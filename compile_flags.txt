@@ -1,0 +1,3 @@
+-Isrc/automata
+-Isrc/regex
+-std=c++20
