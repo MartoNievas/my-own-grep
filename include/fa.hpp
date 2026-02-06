@@ -13,7 +13,6 @@
 #include <type_traits>
 #include <vector>
 
-// Definición de Epsilon para transiciones vacías
 const char EPSILON = '\0';
 
 template <typename T> class FA {
@@ -44,6 +43,16 @@ public:
           std::format("The state: {} does not belong to the automaton", state));
     }
     initial_state = state;
+  }
+
+  void mark_final_state(const std::string &state) {
+    if (!states.contains(state)) {
+      throw std::invalid_argument(
+          std::format("The state: {} does not belong to the automaton", state));
+    }
+    if (!final_states.contains(state)) {
+      final_states.insert(state);
+    }
   }
 
   void add_transition(const std::string &from, char symbol,
