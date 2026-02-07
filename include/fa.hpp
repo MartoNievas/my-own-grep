@@ -27,6 +27,22 @@ public:
   FA() : initial_state(std::nullopt) {}
   virtual ~FA() = default;
 
+  std::set<std::string> &get_states(void) { return states; }
+
+  bool has_transition(const std::string &s1, char symbol) {
+    if (transitions.find(s1) == transitions.end()) {
+      return false;
+    }
+    if (transitions.at(s1).find(symbol) == transitions.at(s1).end()) {
+      return false;
+    }
+    if constexpr (std::is_same_v<T, std::set<std::string>>) {
+      return !transitions.at(s1).at(symbol).empty();
+    } else {
+      return !transitions.at(s1).at(symbol).empty();
+    }
+  }
+
   void add_state(const std::string &state, bool final = false) {
     if (states.contains(state)) {
       throw std::invalid_argument(

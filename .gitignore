@@ -2,4 +2,3 @@ grep
 *.out
 *.o
 main
-test
