@@ -2,3 +2,4 @@ grep
 *.out
 *.o
 main
+bin
