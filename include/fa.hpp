@@ -27,6 +27,14 @@ public:
   FA() : initial_state(std::nullopt) {}
   virtual ~FA() = default;
 
+  std::set<std::string> get_final_states(void) { return final_states; }
+
+  std::map<std::string, std::map<char, T>> &get_transitions(void) {
+    return transitions;
+  }
+
+  std::optional<std::string> get_inital_state(void) { return initial_state; }
+
   std::set<std::string> &get_states(void) { return states; }
 
   bool has_transition(const std::string &s1, char symbol) {

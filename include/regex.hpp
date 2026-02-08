@@ -47,6 +47,9 @@ public:
 /*CLASS - INDIVIDUAL CHARACTER*/
 
 class Char : public Regex {
+private:
+  char symbol;
+
 public:
   Char(char c);
   NDFA *to_ndfa(void) const override;
@@ -62,8 +65,47 @@ private:
   std::shared_ptr<Regex> expr2;
 
 public:
-  Concat(std::shared_ptr<Regex> e1, std::shared_ptr<Regex> e2)
-      : expr1(e1), expr2(e2) {};
+  Concat(std::shared_ptr<Regex> e1, std::shared_ptr<Regex> e2);
+  NDFA *to_ndfa(void) const override;
+  bool _atomic(void) const override;
+  std::string to_string(void) const override;
+};
+
+/*CLASS - UNION FOR TWO REGEX*/
+
+class Union : public Regex {
+private:
+  std::shared_ptr<Regex> expr1;
+  std::shared_ptr<Regex> expr2;
+
+public:
+  Union(std::shared_ptr<Regex> e1, std::shared_ptr<Regex> e2);
+  NDFA *to_ndfa(void) const override;
+  bool _atomic(void) const override;
+  std::string to_string(void) const override;
+};
+
+/*STAR - KLEEN CLOUSURE FOR A REGEX*/
+
+class Star : public Regex {
+private:
+  std::shared_ptr<Regex> expr;
+
+public:
+  Star(std::shared_ptr<Regex> e);
+  NDFA *to_ndfa(void) const override;
+  bool _atomic(void) const override;
+  std::string to_string(void) const override;
+};
+
+/*CLASS - PLUS FOR A REGEX */
+
+class Plus : public Regex {
+private:
+  std::shared_ptr<Regex> expr;
+
+public:
+  Plus(std::shared_ptr<Regex> e);
   NDFA *to_ndfa(void) const override;
   bool _atomic(void) const override;
   std::string to_string(void) const override;
