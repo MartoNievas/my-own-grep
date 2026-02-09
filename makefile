@@ -6,20 +6,23 @@ BINDIR = bin
 
 AUTOMATA_SRC = $(SRCDIR)/automata/dfa.cpp $(SRCDIR)/automata/ndfa.cpp
 REGEX_SRC = $(SRCDIR)/regex/regex.cpp
+LEXER_SRC = $(SRCDIR)/lexer/lexer.cpp $(SRCDIR)/lexer/token.cpp
 
 TEST_SRC_BASIC_METHODS = $(TESTDIR)/automata/test_basic_methods.cpp
 TEST_SRC_DETERMINIZE    = $(TESTDIR)/automata/test_determinize.cpp
 TEST_SRC_MINIMIZE       = $(TESTDIR)/automata/test_minimize.cpp
 TEST_SRC_REGEX          = $(TESTDIR)/regex/test_regex.cpp
+TEST_SRC_LEXER 					= $(TESTDIR)/lexer/test_lexer.cpp
 
 TEST_BIN_BASIC       = $(BINDIR)/test_basic_methods
 TEST_BIN_DETERMINIZE = $(BINDIR)/test_determinize
 TEST_BIN_MINIMIZE    = $(BINDIR)/test_minimize
 TEST_BIN_REGEX       = $(BINDIR)/test_regex
+TEST_BIN_LEXER  		 = $(BINDIR)/test_lexer
 
-ALL_TESTS = $(TEST_BIN_BASIC) $(TEST_BIN_DETERMINIZE) $(TEST_BIN_MINIMIZE) $(TEST_BIN_REGEX)
+ALL_TESTS = $(TEST_BIN_BASIC) $(TEST_BIN_DETERMINIZE) $(TEST_BIN_MINIMIZE) $(TEST_BIN_REGEX) $(TEST_BIN_LEXER)
 
-.PHONY: all clean test test_basic test_determinize test_minimize test_regex test_all
+.PHONY: all clean test test_basic test_determinize test_minimize test_regex test_lexer test_all
 
 all: $(ALL_TESTS)
 
@@ -39,6 +42,9 @@ $(TEST_BIN_MINIMIZE): $(AUTOMATA_SRC) $(TEST_SRC_MINIMIZE) | $(BINDIR)
 $(TEST_BIN_REGEX): $(AUTOMATA_SRC) $(REGEX_SRC) $(TEST_SRC_REGEX) | $(BINDIR)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
+$(TEST_BIN_LEXER): $(LEXER_SRC) $(TEST_SRC_LEXER) | $(BINDIR)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
 test_basic: $(TEST_BIN_BASIC)
 	./$(TEST_BIN_BASIC)
 
@@ -51,6 +57,9 @@ test_minimize: $(TEST_BIN_MINIMIZE)
 test_regex: $(TEST_BIN_REGEX)
 	./$(TEST_BIN_REGEX)
 
+test_lexer: $(TEST_BIN_LEXER)
+	./$(TEST_BIN_LEXER)
+
 test_all: $(ALL_TESTS)
 	@echo "Running basic methods tests..."
 	./$(TEST_BIN_BASIC)
@@ -60,7 +69,7 @@ test_all: $(ALL_TESTS)
 	./$(TEST_BIN_MINIMIZE)
 	@echo -e "\nRunning regex tests..."
 	./$(TEST_BIN_REGEX)
-
+	@echo -e "\nRunning lexer tests..."
 test: test_all
 
 clean:
