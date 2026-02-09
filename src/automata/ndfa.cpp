@@ -1,27 +1,27 @@
 #include "../../include/fa/automata/ndfa.hpp"
 #include "../../include/fa/automata/fa.hpp"
 #include <algorithm>
+#include <map>
+#include <memory>
 #include <queue>
 #include <stdexcept>
 #include <string>
+
 using namespace std;
 
 set<string> NDFA::epsilon_clousure(const set<string> &states) const {
   set<string> closure;
   queue<string> to_process;
 
-  // Inicializar la clausura con los estados dados
   for (const auto &state : states) {
     closure.insert(state);
     to_process.push(state);
   }
 
-  // BFS para encontrar todos los estados alcanzables por epsilon
   while (!to_process.empty()) {
     string current = to_process.front();
     to_process.pop();
 
-    // Buscar transiciones epsilon desde el estado actual
     auto state_it = transitions.find(current);
     if (state_it != transitions.end()) {
       auto symbol_it = state_it->second.find('\0');
@@ -42,7 +42,6 @@ set<string> NDFA::epsilon_clousure(const set<string> &states) const {
 set<string> NDFA::epsilon_clousure(const string &state) const {
   set<string> single_state;
   single_state.insert(state);
-
   return epsilon_clousure(single_state);
 }
 
@@ -50,11 +49,8 @@ set<string> NDFA::move(const set<string> &states, char symbol) const {
   set<string> result;
 
   for (const auto &state : states) {
-
     auto state_it = transitions.find(state);
-
     if (state_it != transitions.end()) {
-
       auto symbol_it = state_it->second.find(symbol);
       if (symbol_it != state_it->second.end()) {
         for (const auto &next_state : symbol_it->second) {
@@ -66,17 +62,16 @@ set<string> NDFA::move(const set<string> &states, char symbol) const {
   return result;
 }
 
-DFA *NDFA::determinize(void) {
-
-  DFA *dfa = new DFA();
+unique_ptr<DFA> NDFA::determinize(void) {
+  auto dfa = make_unique<DFA>();
 
   set<char> alphabet_without_lambda;
-
   for (const auto &symbol : alphabet) {
     if (symbol != '\0') {
       alphabet_without_lambda.insert(symbol);
     }
   }
+
   map<set<string>, string> state_mapping;
   queue<set<string>> to_process;
   int state_counter = 0;

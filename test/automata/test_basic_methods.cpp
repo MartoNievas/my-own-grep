@@ -1,32 +1,39 @@
-#include "../include/fa/automata/dfa.hpp"
-#include "../include/fa/automata/ndfa.hpp"
+#include "../../include/fa/automata/dfa.hpp"
+#include "../../include/fa/automata/fa.hpp"
+#include "../../include/fa/automata/ndfa.hpp"
 #include <cassert>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
+#include <string>
 
 #define RESET "\033[0m"
 #define GREEN "\033[32m"
 #define RED "\033[31m"
 #define CYAN "\033[36m"
 
+#define EPSILON '\0'
+
 int tests_passed = 0;
 int tests_failed = 0;
 
 void print_test(const std::string &name, bool passed) {
   if (passed) {
-    std::cout << "[" GREEN "PASS" RESET "] " << name << std::endl;
+    std::cout << "[" << GREEN << "PASS" << RESET << "] " << name << std::endl;
     tests_passed++;
   } else {
-    std::cout << "[" RED "FAIL" RESET "] " << name << std::endl;
+    std::cout << "[" << RED << "FAIL" << RESET << "] " << name << std::endl;
     tests_failed++;
   }
 }
 
 void print_section(const std::string &title) {
-  std::cout << "\n" CYAN "══════════════════════════════════════" RESET
+  std::cout << "\n"
+            << CYAN << "══════════════════════════════════════" << RESET
             << std::endl;
-  std::cout << CYAN "  " << title << RESET << std::endl;
-  std::cout << CYAN "══════════════════════════════════════" RESET << std::endl;
+  std::cout << CYAN << "  " << title << RESET << std::endl;
+  std::cout << CYAN << "══════════════════════════════════════" << RESET
+            << std::endl;
 }
 
 void test_dfa_add_state() {
@@ -409,12 +416,32 @@ void test_edge_cases() {
             << nfa2.transitions_table() << std::endl;
 }
 
+/* Pruebas de lógica con unique_ptr */
+void test_smart_pointer_logic() {
+  print_section("Minimization and Determinization (Unique_ptr)");
+
+  NDFA nfa;
+  nfa.add_state("q0");
+  nfa.add_state("q1", true);
+  nfa.mark_initial_state("q0");
+  nfa.add_transition("q0", 'a', "q0");
+  nfa.add_transition("q0", 'a', "q1");
+
+  std::unique_ptr<DFA> dfa = nfa.determinize();
+  print_test("Determinization returns valid unique_ptr", dfa != nullptr);
+
+  if (dfa) {
+    std::unique_ptr<DFA> min_dfa = dfa->minimize();
+    print_test("Minimization returns valid unique_ptr", min_dfa != nullptr);
+  }
+}
+
 int main() {
-  std::cout << CYAN "\n╔════════════════════════════════════════╗" RESET
+  std::cout << CYAN << "\n╔════════════════════════════════════════╗" << RESET
             << std::endl;
-  std::cout << CYAN "║     TEST SUITE - Automata Construction  ║" RESET
+  std::cout << CYAN << "║      TEST SUITE - Automata Construction  ║" << RESET
             << std::endl;
-  std::cout << CYAN "╚════════════════════════════════════════╝" RESET
+  std::cout << CYAN << "╚════════════════════════════════════════╝" << RESET
             << std::endl;
 
   test_dfa_add_state();
@@ -433,12 +460,15 @@ int main() {
 
   test_mixed_alphabet();
   test_edge_cases();
+  test_smart_pointer_logic();
 
-  std::cout << "\n" CYAN "════════════════════════════════════════" RESET
+  std::cout << "\n"
+            << CYAN << "════════════════════════════════════════" << RESET
             << std::endl;
-  std::cout << GREEN "✓ Tests passed: " << tests_passed << RESET << std::endl;
-  std::cout << RED "✗ Tests failed: " << tests_failed << RESET << std::endl;
-  std::cout << CYAN "════════════════════════════════════════" RESET
+  std::cout << GREEN << "✓ Tests passed: " << tests_passed << RESET
+            << std::endl;
+  std::cout << RED << "✗ Tests failed: " << tests_failed << RESET << std::endl;
+  std::cout << CYAN << "════════════════════════════════════════" << RESET
             << std::endl;
 
   return tests_failed > 0 ? 1 : 0;

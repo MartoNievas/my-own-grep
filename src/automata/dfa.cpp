@@ -1,17 +1,19 @@
 #include "../../include/fa/automata/dfa.hpp"
 #include "../../include/fa/automata/fa.hpp"
 #include <algorithm>
+#include <map>
+#include <memory>
 #include <queue>
 #include <set>
 #include <stdexcept>
 #include <string>
 #include <vector>
+
 using namespace std;
 
-DFA *DFA::minimize(void) {
-
+unique_ptr<DFA> DFA::minimize(void) {
   if (!initial_state.has_value() || states.empty())
-    return this;
+    return make_unique<DFA>(*this);
 
   // Initial Partitions
   set<string> finals = final_states;
@@ -39,12 +41,12 @@ DFA *DFA::minimize(void) {
     vector<set<string>> new_partition;
 
     for (const auto &block : partitions) {
-
       map<vector<int>, set<string>> buckets;
 
       for (const auto &q : block) {
         vector<int> signature;
         for (char a : symbols) {
+          // Asumiendo que DFA es completo. Si no, manejar estados de error.
           string new_state = transitions[q][a];
           signature.push_back(block_of[new_state]);
         }
@@ -54,16 +56,15 @@ DFA *DFA::minimize(void) {
         new_partition.push_back(states_set);
       }
     }
-    set<set<string>> old_set(partitions.begin(), partitions.end());
-    set<set<string>> new_set(new_partition.begin(), new_partition.end());
 
-    if (old_set == new_set)
+    if (partitions.size() == new_partition.size())
       break;
 
     partitions = new_partition;
   }
+
   // build a new dfa;
-  DFA *min_dfa = new DFA();
+  auto min_dfa = make_unique<DFA>();
   map<string, int> state_block;
   for (size_t i = 0; i < partitions.size(); i++) {
     for (const auto &q : partitions[i]) {
@@ -85,6 +86,7 @@ DFA *DFA::minimize(void) {
     string block_name = "B" + to_string(i);
     min_dfa->add_state(block_name, is_final);
   }
+
   // initial state
   int initial_block_index = state_block[initial_state.value()];
   string initial_block_name = "B" + to_string(initial_block_index);
@@ -105,6 +107,7 @@ DFA *DFA::minimize(void) {
       min_dfa->add_transition(from_block, a, to_block);
     }
   }
+
   min_dfa->normalize_states();
   return min_dfa;
 }

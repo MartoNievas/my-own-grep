@@ -7,7 +7,7 @@
 #include <string>
 namespace fa::regex {
 
-/* ABSTRACT CLASS FOR REGEX*/
+/*ABSTRACT CLASS FOR REGEX*/
 
 class Regex {
 protected:
@@ -20,7 +20,7 @@ public:
   DFA *dfa() const;
   bool match(const std::string &word) const;
 
-  virtual NDFA *to_ndfa(void) const = 0;
+  virtual std::unique_ptr<NDFA> to_ndfa(void) const = 0;
   virtual bool _atomic(void) const = 0;
   virtual std::string to_string(void) const = 0;
 };
@@ -29,7 +29,7 @@ public:
 
 class Empty : public Regex {
 public:
-  NDFA *to_ndfa(void) const override;
+  std::unique_ptr<NDFA> to_ndfa(void) const override;
   bool _atomic(void) const override;
   std::string to_string(void) const override;
 };
@@ -38,7 +38,7 @@ public:
 
 class Lambda : public Regex {
 public:
-  NDFA *to_ndfa(void) const override;
+  std::unique_ptr<NDFA> to_ndfa(void) const override;
   bool _atomic(void) const override;
   std::string to_string(void) const override;
 };
@@ -51,7 +51,7 @@ private:
 
 public:
   Char(char c);
-  NDFA *to_ndfa(void) const override;
+  std::unique_ptr<NDFA> to_ndfa(void) const override;
   bool _atomic(void) const override;
   std::string to_string(void) const override;
 };
@@ -65,7 +65,7 @@ private:
 
 public:
   Concat(std::shared_ptr<Regex> e1, std::shared_ptr<Regex> e2);
-  NDFA *to_ndfa(void) const override;
+  std::unique_ptr<NDFA> to_ndfa(void) const override;
   bool _atomic(void) const override;
   std::string to_string(void) const override;
 };
@@ -79,7 +79,7 @@ private:
 
 public:
   Union(std::shared_ptr<Regex> e1, std::shared_ptr<Regex> e2);
-  NDFA *to_ndfa(void) const override;
+  std::unique_ptr<NDFA> to_ndfa(void) const override;
   bool _atomic(void) const override;
   std::string to_string(void) const override;
 };
@@ -92,7 +92,7 @@ private:
 
 public:
   Star(std::shared_ptr<Regex> e);
-  NDFA *to_ndfa(void) const override;
+  std::unique_ptr<NDFA> to_ndfa(void) const override;
   bool _atomic(void) const override;
   std::string to_string(void) const override;
 };
@@ -105,7 +105,7 @@ private:
 
 public:
   Plus(std::shared_ptr<Regex> e);
-  NDFA *to_ndfa(void) const override;
+  std::unique_ptr<NDFA> to_ndfa(void) const override;
   bool _atomic(void) const override;
   std::string to_string(void) const override;
 };

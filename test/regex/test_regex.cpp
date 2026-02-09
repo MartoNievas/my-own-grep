@@ -1,8 +1,9 @@
-#include "../include/fa/automata/dfa.hpp"
-#include "../include/fa/automata/ndfa.hpp"
-#include "../include/fa/regex/regex.hpp"
+#include "../../include/fa/automata/dfa.hpp"
+#include "../../include/fa/automata/ndfa.hpp"
+#include "../../include/fa/regex/regex.hpp"
 #include <iostream>
 #include <memory>
+#include <set>
 
 #define RESET "\033[0m"
 #define GREEN "\033[32m"
@@ -31,6 +32,7 @@ void print_section(const std::string &title) {
 }
 
 using namespace std;
+using namespace fa::regex;
 
 void test_empty_basic() {
   print_section("Empty: Basic Tests");
@@ -314,7 +316,7 @@ void test_nested_operators() {
 int main() {
   std::cout << CYAN "\n╔════════════════════════════════════════╗" RESET
             << std::endl;
-  std::cout << CYAN "║     TEST SUITE - Regular Expressions   ║" RESET
+  std::cout << CYAN "║      TEST SUITE - Regular Expressions    ║" RESET
             << std::endl;
   std::cout << CYAN "╚════════════════════════════════════════╝" RESET
             << std::endl;
