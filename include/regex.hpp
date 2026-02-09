@@ -1,11 +1,9 @@
-#ifndef REG_HPP
-#define REG_HPP
+#ifndef REGEX_HPP
+#define REGEX_HPP
 
 #include "dfa.hpp"
-#include "fa.hpp"
 #include "ndfa.hpp"
 #include <memory>
-#include <optional>
 #include <string>
 
 /* ABSTRACT CLASS FOR REGEX*/
@@ -111,4 +109,4 @@ public:
   std::string to_string(void) const override;
 };
 
-#endif // !REG_HPP
+#endif // !REGEX_HPP
