@@ -6,21 +6,19 @@
 #include <string>
 using namespace std;
 
-Regex::~Regex() {
-  if (_dfa_cache != nullptr) {
-    delete _dfa_cache;
-  }
-}
+namespace fa::regex {
+
+Regex::~Regex() = default;
 
 DFA *Regex::dfa() const {
   if (_dfa_cache == nullptr) {
     NDFA *ndfa = to_ndfa();
     DFA *dfa = ndfa->determinize();
-    _dfa_cache = dfa->minimize();
+    _dfa_cache = std::unique_ptr<DFA>(dfa->minimize());
     delete ndfa;
     delete dfa;
   }
-  return _dfa_cache;
+  return _dfa_cache.get();
 }
 
 bool Regex::match(const string &word) const {
@@ -337,3 +335,4 @@ string Plus::to_string(void) const {
   return (expr->_atomic()) ? expr->to_string() + "+"
                            : "(" + expr->to_string() + ")+";
 }
+} // namespace fa::regex

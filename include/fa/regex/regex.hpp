@@ -5,12 +5,13 @@
 #include "../automata/ndfa.hpp"
 #include <memory>
 #include <string>
+namespace fa::regex {
 
 /* ABSTRACT CLASS FOR REGEX*/
 
 class Regex {
 protected:
-  mutable DFA *_dfa_cache;
+  mutable std::unique_ptr<DFA> _dfa_cache;
 
 public:
   Regex() : _dfa_cache(nullptr) {};
@@ -108,5 +109,5 @@ public:
   bool _atomic(void) const override;
   std::string to_string(void) const override;
 };
-
+} // namespace fa::regex
 #endif // !REGEX_HPP
