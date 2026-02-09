@@ -1,5 +1,5 @@
-#include "../../include/dfa.hpp"
-#include "../../include/fa.hpp"
+#include "../../include/fa/automata/dfa.hpp"
+#include "../../include/fa/automata/fa.hpp"
 #include <algorithm>
 #include <queue>
 #include <set>

@@ -1,5 +1,5 @@
-#include "../include/dfa.hpp"
-#include "../include/ndfa.hpp"
+#include "../include/fa/automata/dfa.hpp"
+#include "../include/fa/automata/ndfa.hpp"
 #include <iostream>
 
 #define RESET "\033[0m"

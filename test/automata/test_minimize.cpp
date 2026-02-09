@@ -1,4 +1,4 @@
-#include "../include/dfa.hpp"
+#include "../include/fa/automata/dfa.hpp"
 #include <iostream>
 
 #define RESET "\033[0m"

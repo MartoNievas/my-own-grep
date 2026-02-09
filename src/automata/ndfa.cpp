@@ -1,5 +1,5 @@
-#include "../../include/ndfa.hpp"
-#include "../../include/fa.hpp"
+#include "../../include/fa/automata/ndfa.hpp"
+#include "../../include/fa/automata/fa.hpp"
 #include <algorithm>
 #include <queue>
 #include <stdexcept>

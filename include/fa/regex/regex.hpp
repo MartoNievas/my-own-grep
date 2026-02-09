@@ -1,8 +1,8 @@
 #ifndef REGEX_HPP
 #define REGEX_HPP
 
-#include "dfa.hpp"
-#include "ndfa.hpp"
+#include "../automata/dfa.hpp"
+#include "../automata/ndfa.hpp"
 #include <memory>
 #include <string>
 
