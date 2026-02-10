@@ -3,3 +3,4 @@ grep
 *.o
 main
 bin
+text

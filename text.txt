@@ -1,0 +1,13 @@
+Historia de la Programación
+
+La historia de los lenguajes de programación comenzó mucho antes de la invención de la computadora moderna. Ada Lovelace es reconocida como la primera programadora de la historia, tras escribir un algoritmo para la máquina analítica de Charles Babbage en el siglo XIX. Sin embargo, no fue hasta la década de 1950 que aparecieron los primeros lenguajes de alto nivel.
+
+En 1957, IBM desarrolló Fortran (Formula Translation), diseñado para cálculos científicos y de ingeniería. Poco después, en 1959, nació COBOL, orientado a los negocios y la gestión administrativa. Estos lenguajes permitieron a los programadores escribir instrucciones más cercanas al lenguaje humano que al código de máquina.
+
+La verdadera revolución ocurrió en 1972 con la creación del lenguaje C en los Laboratorios Bell. C combinaba la eficiencia del bajo nivel con la legibilidad del alto nivel. A partir de C, surgieron lenguajes icónicos como C++ en 1983, que introdujo la programación orientada a objetos (POO), y más tarde Java en 1995, con su filosofía de "escribir una vez, ejecutar en cualquier lugar".
+
+En la actualidad, Python se ha convertido en uno de los lenguajes más populares debido a su sintaxis limpia y su versatilidad en ciencia de datos e inteligencia artificial. Otros lenguajes modernos como Rust y Go están ganando terreno gracias a su enfoque en la seguridad de memoria y la concurrencia. El desarrollo de software sigue evolucionando, pero la base sentada por C y C++ sigue siendo fundamental en los sistemas operativos que usamos hoy en día.
+
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+                                         

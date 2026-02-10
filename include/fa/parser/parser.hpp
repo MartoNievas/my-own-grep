@@ -14,12 +14,8 @@ private:
 public:
   Parser(const std::string &input)
       : lexer(input), current(lexer.next_token()) {}
-
   std::shared_ptr<fa::regex::Regex> parse(void);
-
-private:
   void eat(TOKEN_TYPE type);
-
   std::shared_ptr<fa::regex::Regex> parse_union(void);
   std::shared_ptr<fa::regex::Regex> parse_concat(void);
   std::shared_ptr<fa::regex::Regex> parse_star(void);
