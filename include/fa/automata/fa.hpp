@@ -1,6 +1,5 @@
 #ifndef FA_HPP
 #define FA_HPP
-
 #include <algorithm>
 #include <format>
 #include <iomanip>
@@ -10,10 +9,14 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
+#ifndef EPSILON_DEFINED
+#define EPSILON_DEFINED
 const char EPSILON = '\0';
+#endif
 
 template <typename T> class FA {
 protected:
@@ -27,27 +30,40 @@ public:
   FA() : initial_state(std::nullopt) {}
   virtual ~FA() = default;
 
-  std::set<std::string> get_final_states(void) { return final_states; }
+  [[nodiscard]] const std::set<std::string> &get_final_states() const {
+    return final_states;
+  }
 
-  std::map<std::string, std::map<char, T>> &get_transitions(void) {
+  [[nodiscard]] const std::map<std::string, std::map<char, T>> &
+  get_transitions() const {
     return transitions;
   }
 
-  std::optional<std::string> get_inital_state(void) { return initial_state; }
+  std::map<std::string, std::map<char, T>> &get_transitions() {
+    return transitions;
+  }
 
-  std::set<std::string> &get_states(void) { return states; }
+  [[nodiscard]] const std::optional<std::string> &get_inital_state() const {
+    return initial_state;
+  }
 
-  bool has_transition(const std::string &s1, char symbol) {
-    if (transitions.find(s1) == transitions.end()) {
+  [[nodiscard]] const std::set<std::string> &get_states() const {
+    return states;
+  }
+
+  [[nodiscard]] bool has_transition(std::string_view s1, char symbol) const {
+    auto it_state = transitions.find(std::string(s1));
+    if (it_state == transitions.end())
       return false;
-    }
-    if (transitions.at(s1).find(symbol) == transitions.at(s1).end()) {
+
+    auto it_symbol = it_state->second.find(symbol);
+    if (it_symbol == it_state->second.end())
       return false;
-    }
+
     if constexpr (std::is_same_v<T, std::set<std::string>>) {
-      return !transitions.at(s1).at(symbol).empty();
+      return !it_symbol->second.empty();
     } else {
-      return !transitions.at(s1).at(symbol).empty();
+      return !it_symbol->second.empty();
     }
   }
 
@@ -74,9 +90,7 @@ public:
       throw std::invalid_argument(
           std::format("The state: {} does not belong to the automaton", state));
     }
-    if (!final_states.contains(state)) {
-      final_states.insert(state);
-    }
+    final_states.insert(state);
   }
 
   void add_transition(const std::string &from, char symbol,
@@ -94,69 +108,63 @@ public:
     }
   }
 
-  int size() const { return static_cast<int>(states.size()); }
+  [[nodiscard]] int size() const { return static_cast<int>(states.size()); }
 
-  FA &normalize_states(void) {
-    std::map<std::string, std::string> new_names = {};
-
-    if (initial_state) {
+  FA &normalize_states() {
+    std::map<std::string, std::string> new_names;
+    if (initial_state)
       new_names[*initial_state] = "q0";
-    }
 
-    int i = 1;
+    int i = (initial_state ? 1 : 0);
     for (const auto &state : states) {
       if (!initial_state || state != *initial_state) {
         new_names[state] = std::format("q{}", i++);
       }
     }
 
-    for (const auto &[old_name, new_name] : new_names) {
+    for (const auto &[old_name, new_name] : new_names)
       _rename_state(old_name, "temp_" + new_name);
-    }
-
-    for (const auto &[old_name, new_name] : new_names) {
+    for (const auto &[old_name, new_name] : new_names)
       _rename_state("temp_" + new_name, new_name);
-    }
 
     return *this;
   }
 
-  std::string transitions_table(void) const {
+  [[nodiscard]] std::string transitions_table() const {
     std::stringstream ss;
     std::vector<char> sorted_alphabet(alphabet.begin(), alphabet.end());
-
-    if constexpr (std::is_same_v<T, std::set<std::string>>) {
+    if constexpr (std::is_same_v<T, std::set<std::string>>)
       sorted_alphabet.insert(sorted_alphabet.begin(), EPSILON);
-    }
 
-    const int col_w = 10;
-    ss << std::left << std::setw(12) << "Estado" << " | ";
-    for (char c : sorted_alphabet) {
+    const int col_w = 12;
+    ss << std::left << std::setw(15) << "Estado" << " | ";
+    for (char c : sorted_alphabet)
       ss << std::setw(col_w) << (c == EPSILON ? "EPS" : std::string(1, c))
          << " | ";
-    }
-    ss << "\n" << std::string(15 + col_w * sorted_alphabet.size(), '-') << "\n";
+    ss << "\n" << std::string(18 + col_w * sorted_alphabet.size(), '-') << "\n";
 
     for (const auto &state : states) {
       std::string label =
           (initial_state && state == *initial_state) ? "->" : "";
       label += state + (final_states.contains(state) ? "*" : "");
+      ss << std::left << std::setw(15) << label << " | ";
 
-      ss << std::left << std::setw(12) << label << " | ";
-
+      auto it_state = transitions.find(state);
       for (char c : sorted_alphabet) {
         std::string cell = "-";
-        if (transitions.contains(state) && transitions.at(state).contains(c)) {
-          const auto &target = transitions.at(state).at(c);
-          if constexpr (std::is_same_v<T, std::set<std::string>>) {
-            cell = "{";
-            for (const auto &t : target)
-              cell += t + ",";
-            if (cell.size() > 1)
-              cell.pop_back();
-            cell += "}";
-          } else {
-            cell = target;
+        if (it_state != transitions.end()) {
+          auto it_char = it_state->second.find(c);
+          if (it_char != it_state->second.end()) {
+            if constexpr (std::is_same_v<T, std::set<std::string>>) {
+              cell = "{";
+              for (const auto &t : it_char->second)
+                cell += t + ",";
+              if (cell.size() > 1)
+                cell.pop_back();
+              cell += "}";
+            } else {
+              cell = it_char->second;
+            }
           }
         }
         ss << std::setw(col_w) << cell << " | ";
@@ -171,41 +179,30 @@ protected:
     if (old_name == new_name)
       return;
 
-    if (states.contains(old_name)) {
-      states.erase(old_name);
+    if (states.erase(old_name))
       states.insert(new_name);
-    }
-
-    if (initial_state && *initial_state == old_name) {
+    if (initial_state && *initial_state == old_name)
       initial_state = new_name;
-    }
-
-    if (final_states.contains(old_name)) {
-      final_states.erase(old_name);
+    if (final_states.erase(old_name))
       final_states.insert(new_name);
-    }
 
-    if (transitions.contains(old_name)) {
-      auto nh = transitions.extract(old_name);
+    if (auto it = transitions.find(old_name); it != transitions.end()) {
+      auto nh = transitions.extract(it);
       nh.key() = new_name;
       transitions.insert(std::move(nh));
     }
 
-    for (auto &[source, symbol_map] : transitions) {
-      for (auto &[symbol, target] : symbol_map) {
+    for (auto &[src, symbol_map] : transitions) {
+      for (auto &[sym, target] : symbol_map) {
         if constexpr (std::is_same_v<T, std::set<std::string>>) {
-          if (target.contains(old_name)) {
-            target.erase(old_name);
+          if (target.erase(old_name))
             target.insert(new_name);
-          }
         } else {
-          if (target == old_name) {
+          if (target == old_name)
             target = new_name;
-          }
         }
       }
     }
   }
 };
-
-#endif
+#endif // !FA_HPP

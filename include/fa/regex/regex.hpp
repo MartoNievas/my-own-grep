@@ -1,62 +1,61 @@
 #ifndef REGEX_HPP
 #define REGEX_HPP
-
 #include "../automata/dfa.hpp"
 #include "../automata/ndfa.hpp"
 #include <memory>
+#include <optional>
 #include <string>
+#include <string_view>
+
 namespace fa::regex {
-
-/*ABSTRACT CLASS FOR REGEX*/
-
+struct DFA_Fast {
+  int initial_state = -1;
+  std::vector<std::array<int, 256>> transitions;
+  std::vector<bool> accept_states;
+};
 class Regex {
+
 protected:
   mutable std::unique_ptr<DFA> _dfa_cache;
+  mutable std::unique_ptr<DFA_Fast> _dfa_fast_cache;
 
 public:
-  Regex() : _dfa_cache(nullptr) {};
+  Regex() : _dfa_cache(nullptr) {}
   virtual ~Regex();
 
-  DFA *dfa() const;
+  const DFA *dfa() const;
+
   bool match(const std::string &word) const;
 
-  virtual std::unique_ptr<NDFA> to_ndfa(void) const = 0;
-  virtual bool _atomic(void) const = 0;
-  virtual std::string to_string(void) const = 0;
+  virtual std::unique_ptr<NDFA> to_ndfa() const = 0;
+  virtual bool _atomic() const = 0;
+  virtual std::string to_string() const = 0;
 };
-
-/*CLASS - EMPTY LANGUAGE */
 
 class Empty : public Regex {
 public:
-  std::unique_ptr<NDFA> to_ndfa(void) const override;
-  bool _atomic(void) const override;
-  std::string to_string(void) const override;
+  std::unique_ptr<NDFA> to_ndfa() const override;
+  bool _atomic() const override;
+  std::string to_string() const override;
 };
-
-/*CLASS - EMPTY STRING*/
 
 class Lambda : public Regex {
 public:
-  std::unique_ptr<NDFA> to_ndfa(void) const override;
-  bool _atomic(void) const override;
-  std::string to_string(void) const override;
+  std::unique_ptr<NDFA> to_ndfa() const override;
+  bool _atomic() const override;
+  std::string to_string() const override;
 };
-
-/*CLASS - INDIVIDUAL CHARACTER*/
 
 class Char : public Regex {
 private:
   char symbol;
 
 public:
-  Char(char c);
-  std::unique_ptr<NDFA> to_ndfa(void) const override;
-  bool _atomic(void) const override;
-  std::string to_string(void) const override;
+  explicit Char(char c);
+  std::unique_ptr<NDFA> to_ndfa() const override;
+  bool _atomic() const override;
+  std::string to_string() const override;
 };
-
-/*CONCAT - CONCATENATION FROM TWO REGEX*/
 
 class Concat : public Regex {
 private:
@@ -65,12 +64,10 @@ private:
 
 public:
   Concat(std::shared_ptr<Regex> e1, std::shared_ptr<Regex> e2);
-  std::unique_ptr<NDFA> to_ndfa(void) const override;
-  bool _atomic(void) const override;
-  std::string to_string(void) const override;
+  std::unique_ptr<NDFA> to_ndfa() const override;
+  bool _atomic() const override;
+  std::string to_string() const override;
 };
-
-/*CLASS - UNION FOR TWO REGEX*/
 
 class Union : public Regex {
 private:
@@ -79,35 +76,33 @@ private:
 
 public:
   Union(std::shared_ptr<Regex> e1, std::shared_ptr<Regex> e2);
-  std::unique_ptr<NDFA> to_ndfa(void) const override;
-  bool _atomic(void) const override;
-  std::string to_string(void) const override;
+  std::unique_ptr<NDFA> to_ndfa() const override;
+  bool _atomic() const override;
+  std::string to_string() const override;
 };
-
-/*STAR - KLEEN CLOUSURE FOR A REGEX*/
 
 class Star : public Regex {
 private:
   std::shared_ptr<Regex> expr;
 
 public:
-  Star(std::shared_ptr<Regex> e);
-  std::unique_ptr<NDFA> to_ndfa(void) const override;
-  bool _atomic(void) const override;
-  std::string to_string(void) const override;
+  explicit Star(std::shared_ptr<Regex> e);
+  std::unique_ptr<NDFA> to_ndfa() const override;
+  bool _atomic() const override;
+  std::string to_string() const override;
 };
-
-/*CLASS - PLUS FOR A REGEX */
 
 class Plus : public Regex {
 private:
   std::shared_ptr<Regex> expr;
 
 public:
-  Plus(std::shared_ptr<Regex> e);
-  std::unique_ptr<NDFA> to_ndfa(void) const override;
-  bool _atomic(void) const override;
-  std::string to_string(void) const override;
+  explicit Plus(std::shared_ptr<Regex> e);
+  std::unique_ptr<NDFA> to_ndfa() const override;
+  bool _atomic() const override;
+  std::string to_string() const override;
 };
+
 } // namespace fa::regex
+
 #endif // !REGEX_HPP

@@ -1,43 +1,50 @@
 #include "../../include/fa/lexer/token.hpp"
+#include <format> // Requiere C++20
+#include <string>
 
 using namespace std;
 
 string Token::to_string() const {
   switch (type) {
-  case TOKEN_TYPE::LITERAL:
-    if (value == '\0') {
-      return "CHAR('\\0')"; // Mostrar explícitamente
+  case TOKEN_TYPE::LITERAL: {
+    switch (value) {
+    case '\0':
+      return "LITERAL(\\0)";
+    case '\n':
+      return "LITERAL(\\n)";
+    case '\t':
+      return "LITERAL(\\t)";
+    case '\r':
+      return "LITERAL(\\r)";
+    case ' ':
+      return "LITERAL(' ')";
+    default:
+      return format("LITERAL('{}')", value);
     }
-    return string("CHAR('") + value + "')";
+  }
 
   case TOKEN_TYPE::UNION:
     return "UNION(|)";
-
   case TOKEN_TYPE::STAR:
     return "STAR(*)";
-
   case TOKEN_TYPE::PLUS:
     return "PLUS(+)";
-
+  case TOKEN_TYPE::CONCAT:
+    return "CONCAT(.)"; // Importante para el Parser
   case TOKEN_TYPE::OPAREN:
     return "OPAREN(()";
-
   case TOKEN_TYPE::CPAREN:
     return "CPAREN())";
-
   case TOKEN_TYPE::LAMBDA:
     return "LAMBDA(ε)";
-
   case TOKEN_TYPE::EMPTY:
     return "EMPTY(∅)";
-
   case TOKEN_TYPE::END:
-    return "END_OF_INPUT";
-
+    return "EOF";
   case TOKEN_TYPE::INVALID:
-    return "INVALID";
+    return "INVALID_TOKEN";
 
   default:
-    return "UNKNOWN";
+    return format("UNKNOWN_TOKEN({})", static_cast<int>(type));
   }
 }

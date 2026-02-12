@@ -3,6 +3,7 @@
 
 #include "token.hpp"
 #include <string>
+#include <string_view>
 #include <vector>
 
 class Lexer {
@@ -16,10 +17,14 @@ public:
   char peek(int offset = 1) const;
 
 public:
-  Lexer(const std::string &text);
+  Lexer(std::string_view text);
 
   Token next_token(void);
   std::vector<Token> tokenize(void);
+
+private:
+  std::vector<Token>
+  insert_implicit_concatenation(const std::vector<Token> &tokens);
 };
 
 #endif // !LEXER_HPP

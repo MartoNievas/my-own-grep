@@ -1,3 +1,4 @@
+
 #include "../../include/fa/regex/regex.hpp"
 #include "../../include/fa/automata/dfa.hpp"
 #include "../../include/fa/automata/ndfa.hpp"
@@ -5,6 +6,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <unordered_map>
 
 using namespace std;
 
@@ -12,7 +14,7 @@ namespace fa::regex {
 
 Regex::~Regex() = default;
 
-DFA *Regex::dfa() const {
+const DFA *Regex::dfa() const {
   if (_dfa_cache == nullptr) {
     unique_ptr<NDFA> ndfa = to_ndfa();
     unique_ptr<DFA> dfa_det(ndfa->determinize());
@@ -21,29 +23,75 @@ DFA *Regex::dfa() const {
   return _dfa_cache.get();
 }
 
-bool Regex::match(const string &word) const {
-  DFA *dfa_to_match = dfa();
+static unique_ptr<DFA_Fast> build_fast_dfa(const DFA &dfa) {
+  auto fast = make_unique<DFA_Fast>();
 
-  if (!dfa_to_match || !dfa_to_match->get_inital_state().has_value())
-    return false;
+  const auto &initial_opt = dfa.get_inital_state();
+  if (!initial_opt.has_value())
+    return fast;
 
-  string curr = dfa_to_match->get_inital_state().value();
-  const auto &trans = dfa_to_match->get_transitions();
+  unordered_map<string, int> state_index;
+  int idx = 0;
+  state_index[initial_opt.value()] = idx++;
 
-  for (char symbol : word) {
-    if (trans.find(curr) == trans.end()) {
-      return false;
+  const auto &trans = dfa.get_transitions();
+  for (const auto &[state, edges] : trans) {
+    if (!state_index.count(state))
+      state_index[state] = idx++;
+    for (const auto &[symbol, dst] : edges) {
+      if (!state_index.count(dst))
+        state_index[dst] = idx++;
     }
-
-    const auto &state_transitions = trans.at(curr);
-    if (state_transitions.find(symbol) == state_transitions.end()) {
-      return false;
-    }
-
-    curr = state_transitions.at(symbol);
   }
 
-  return dfa_to_match->get_final_states().count(curr) > 0;
+  fast->initial_state = 0;
+
+  // Inicializar tabla con -1
+  fast->transitions.assign(idx, {});
+  for (auto &row : fast->transitions)
+    row.fill(-1);
+
+  // Llenar transiciones (FUERA del loop anterior)
+  for (const auto &[state, edges] : trans) {
+    int from = state_index[state];
+    for (const auto &[symbol, dst] : edges) {
+      fast->transitions[from][(unsigned char)symbol] = state_index[dst];
+    }
+  }
+
+  // Estados de aceptación (UNA sola vez)
+  fast->accept_states.assign(idx, false);
+  for (const auto &accept : dfa.get_final_states()) {
+    auto it = state_index.find(accept);
+    if (it != state_index.end())
+      fast->accept_states[it->second] = true;
+  }
+
+  return fast;
+}
+
+bool Regex::match(const string &word) const {
+  if (!_dfa_fast_cache) { // <-- ! aquí
+    const DFA *dfa_ptr = dfa();
+    if (!dfa_ptr)
+      return false;
+    if (!dfa_ptr->get_inital_state().has_value())
+      return false;
+    _dfa_fast_cache = build_fast_dfa(*dfa_ptr);
+    if (!_dfa_fast_cache || _dfa_fast_cache->initial_state < 0)
+      return false;
+  }
+
+  const DFA_Fast &fast = *_dfa_fast_cache;
+  int curr = fast.initial_state;
+
+  for (unsigned char symbol : word) {
+    curr = fast.transitions[curr][symbol];
+    if (curr < 0)
+      return false;
+  }
+
+  return fast.accept_states[curr];
 }
 
 /* EMPTY */

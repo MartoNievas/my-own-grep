@@ -3,6 +3,7 @@
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <string_view>
 
@@ -26,7 +27,7 @@ int main(int argc, char *argv[]) {
 
   try {
     Parser parser(regex_str);
-    auto regex_engine = parser.parse();
+    shared_ptr<fa::regex::Regex> regex_engine = parser.parse();
 
     ifstream file(filepath);
     if (!file.is_open())

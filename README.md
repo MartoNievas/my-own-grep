@@ -9,6 +9,39 @@ At a high level, the engine takes a regular expression, processes it through sev
 - **Parser**: Builds a structured representation of the regex from the token stream.
 - **Finite Automata**: Converts the parsed regex into an NDFA and/or DFA for efficient pattern matching.
 
+## Usage
+```bash
+grep <regex> <filepath>
+```
+
+**Examples:**
+```bash
+./grep "a"          text.txt   # lines containing 'a'
+./grep "ab"         text.txt   # lines containing 'ab'
+./grep "a|b"        text.txt   # lines containing 'a' or 'b'
+./grep "ab*"        text.txt   # lines containing 'a' followed by zero or more 'b'
+./grep "ab+"        text.txt   # lines containing 'a' followed by one or more 'b'
+./grep "(ab|cd)+"   text.txt   # lines containing one or more repetitions of 'ab' or 'cd'
+```
+
+## Supported Operations
+
+| Operation | Syntax | Description |
+|-----------|--------|-------------|
+| Literal | `a` | Matches the exact character `a` |
+| Concatenation | `ab` | Matches `a` followed by `b` |
+| Union | `a\|b` | Matches either `a` or `b` |
+| Kleene Star | `a*` | Matches zero or more repetitions of `a` |
+| Plus | `a+` | Matches one or more repetitions of `a` |
+| Grouping | `(ab)` | Groups expressions to apply operators to them |
+| Empty | `∅` | Matches nothing |
+| Lambda | `λ` | Matches the empty string |
+
+Operations can be combined and nested using parentheses:
+- `(a|b)*` — any string of `a`s and `b`s, including empty
+- `(ab)+` — one or more repetitions of `ab`
+- `a(b|c)*d` — `a`, then any combination of `b` and `c`, then `d`
+
 ## Key Concepts
 - **Regular Expression Engines**  
   Modern regex implementations (e.g., those in languages and tools) vary in design, but many rely on automata theory for pattern matching performance and correctness.
@@ -20,7 +53,7 @@ At a high level, the engine takes a regular expression, processes it through sev
   - **NDFA (Nondeterministic Finite Automaton)**: Easy to construct from regex syntax, can have multiple possible transitions.
   - **DFA (Deterministic Finite Automaton)**: Derived from an NDFA, has a single transition per input per state, enabling faster execution.
 
-- **grep**
+- **grep**  
   The Unix tool `grep` (Global Regular Expression Print) is a classic example of a regex engine used for searching text with patterns. This project is inspired by the matching and automata-based techniques commonly associated with `grep`.
 
 ## References

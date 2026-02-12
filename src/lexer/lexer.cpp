@@ -2,22 +2,18 @@
 #include "../../include/fa/lexer/token.hpp"
 #include <cctype>
 #include <stdexcept>
+#include <string_view>
 
 using namespace std;
 
-Lexer::Lexer(const string &text) : input(text), position(0) {
+// Si cambias el header, usa string_view para 'input'
+Lexer::Lexer(string_view text) : input(text), position(0) {
   current_char = input.empty() ? '\0' : input[0];
 }
 
-void Lexer::advance(void) {
+void Lexer::advance() {
   position++;
   current_char = (position < input.length()) ? input[position] : '\0';
-}
-
-void Lexer::skip_whitespace(void) {
-  while (current_char != '\0' && isspace(current_char)) {
-    advance();
-  }
 }
 
 char Lexer::peek(int offset) const {
@@ -25,7 +21,13 @@ char Lexer::peek(int offset) const {
   return (peek_pos < input.length()) ? input[peek_pos] : '\0';
 }
 
-Token Lexer::next_token(void) {
+void Lexer::skip_whitespace() {
+  while (current_char != '\0' && isspace(current_char)) {
+    advance();
+  }
+}
+
+Token Lexer::next_token() {
   skip_whitespace();
 
   if (current_char == '\0') {
@@ -36,64 +38,101 @@ Token Lexer::next_token(void) {
   case '|':
     advance();
     return Token(TOKEN_TYPE::UNION, '|');
-
   case '*':
     advance();
     return Token(TOKEN_TYPE::STAR, '*');
-
   case '+':
     advance();
     return Token(TOKEN_TYPE::PLUS, '+');
-
   case '(':
     advance();
     return Token(TOKEN_TYPE::OPAREN, '(');
-
   case ')':
     advance();
     return Token(TOKEN_TYPE::CPAREN, ')');
-
   case '@':
     advance();
     return Token(TOKEN_TYPE::LAMBDA);
-
   case '#':
     advance();
     return Token(TOKEN_TYPE::EMPTY);
 
-  case '\\': {
+  case '\\': { // Manejo de escapes mejorado
     advance();
-    if (current_char == '\0') {
+    if (current_char == '\0')
       return Token(TOKEN_TYPE::INVALID);
-    }
+
     char escaped = current_char;
+    switch (current_char) {
+    case 'n':
+      escaped = '\n';
+      break;
+    case 't':
+      escaped = '\t';
+      break;
+    case 'r':
+      escaped = '\r';
+      break;
+      // Puedes añadir \d, \w etc. si tu motor los soporta
+    }
     advance();
     return Token(TOKEN_TYPE::LITERAL, escaped);
   }
 
-  default:
-    if (isalnum(current_char)) {
-      char c = current_char;
-      advance();
-      return Token(TOKEN_TYPE::LITERAL, c);
-    }
+  default: {
+    char c = current_char;
     advance();
-    return Token(TOKEN_TYPE::INVALID);
+    // Cualquier cosa que no sea un operador es un literal
+    return Token(TOKEN_TYPE::LITERAL, c);
+  }
   }
 }
 
-vector<Token> Lexer::tokenize(void) {
+vector<Token> Lexer::tokenize() {
   vector<Token> tokens;
-  Token token = next_token();
 
-  while (token.type != TOKEN_TYPE::END) {
+  while (true) {
+    Token token = next_token();
     if (token.type == TOKEN_TYPE::INVALID) {
-      throw invalid_argument("This token is invalid");
+      throw invalid_argument("Lexer Error: Invalid character at position " +
+                             to_string(position));
     }
+
     tokens.push_back(token);
-    token = next_token();
+    if (token.type == TOKEN_TYPE::END)
+      break;
   }
 
-  tokens.push_back(token);
-  return tokens;
+  return insert_implicit_concatenation(tokens);
+}
+
+// Función auxiliar opcional pero MUY recomendada para Regex
+vector<Token>
+Lexer::insert_implicit_concatenation(const vector<Token> &tokens) {
+  vector<Token> result;
+  for (size_t i = 0; i < tokens.size(); ++i) {
+    Token t1 = tokens[i];
+    result.push_back(t1);
+
+    if (i + 1 < tokens.size()) {
+      Token t2 = tokens[i + 1];
+
+      // Lógica: Si t1 es un operando y t2 es el inicio de otro operando,
+      // insertar CONCAT
+      bool t1_is_operand =
+          (t1.type == TOKEN_TYPE::LITERAL || t1.type == TOKEN_TYPE::CPAREN ||
+           t1.type == TOKEN_TYPE::STAR || t1.type == TOKEN_TYPE::PLUS ||
+           t1.type == TOKEN_TYPE::LAMBDA || t1.type == TOKEN_TYPE::EMPTY);
+
+      bool t2_starts_operand =
+          (t2.type == TOKEN_TYPE::LITERAL || t2.type == TOKEN_TYPE::OPAREN ||
+           t2.type == TOKEN_TYPE::LAMBDA || t2.type == TOKEN_TYPE::EMPTY);
+
+      if (t1_is_operand && t2_starts_operand) {
+        // Debes tener un tipo TOKEN_TYPE::CONCAT en tu enum
+        result.push_back(Token(TOKEN_TYPE::CONCAT, '.'));
+      }
+    }
+  }
+  return result;
 }
