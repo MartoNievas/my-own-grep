@@ -1,5 +1,4 @@
 #include "../../include/fa/automata/dfa.hpp"
-#include "../../include/fa/automata/fa.hpp"
 #include <map>
 #include <memory>
 #include <set>
@@ -24,19 +23,15 @@ unique_ptr<DFA> DFA::minimize(void) {
     partitions.push_back(no_finals);
 
   vector<char> symbols(alphabet.begin(), alphabet.end());
+  map<string, int> block_of;
 
-  auto build_block_map = [&]() {
-    map<string, int> block_of;
+  while (true) {
+    block_of.clear();
     for (size_t i = 0; i < partitions.size(); i++)
       for (const auto &q : partitions[i])
         block_of[q] = i;
-    return block_of;
-  };
 
-  while (true) {
-    auto block_of = build_block_map();
     vector<set<string>> new_partitions;
-
     for (const auto &block : partitions) {
       map<vector<int>, set<string>> buckets;
       for (const auto &q : block) {
@@ -55,9 +50,8 @@ unique_ptr<DFA> DFA::minimize(void) {
     partitions = move(new_partitions);
   }
 
-  auto block_of = build_block_map();
+  // block_of ya tiene el resultado final, no hay que reconstruirlo
   auto block_name = [](int i) { return "B" + to_string(i); };
-
   auto min_dfa = make_unique<DFA>();
 
   for (size_t i = 0; i < partitions.size(); i++) {

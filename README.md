@@ -11,7 +11,7 @@ At a high level, the engine takes a regular expression, processes it through sev
 
 ## Usage
 ```bash
-grep <regex> <filepath>
+./grep [OPTION]... REGEX FILE
 ```
 
 **Examples:**
@@ -22,25 +22,54 @@ grep <regex> <filepath>
 ./grep "ab*"        text.txt   # lines containing 'a' followed by zero or more 'b'
 ./grep "ab+"        text.txt   # lines containing 'a' followed by one or more 'b'
 ./grep "(ab|cd)+"   text.txt   # lines containing one or more repetitions of 'ab' or 'cd'
+./grep -n "a"       text.txt   # show line numbers
+./grep -v "a"       text.txt   # lines that do NOT contain 'a'
+./grep -c "a"       text.txt   # count matching lines
+./grep -in "a"      text.txt   # flags can be combined
 ```
 
 ## Supported Operations
 
-| Operation | Syntax | Description |
-|-----------|--------|-------------|
-| Literal | `a` | Matches the exact character `a` |
-| Concatenation | `ab` | Matches `a` followed by `b` |
-| Union | `a\|b` | Matches either `a` or `b` |
-| Kleene Star | `a*` | Matches zero or more repetitions of `a` |
-| Plus | `a+` | Matches one or more repetitions of `a` |
-| Grouping | `(ab)` | Groups expressions to apply operators to them |
-| Empty | `∅` | Matches nothing |
-| Lambda | `λ` | Matches the empty string |
+| Operation     | Syntax   | Description                                   |
+|---------------|----------|-----------------------------------------------|
+| Literal       | `a`      | Matches the exact character `a`               |
+| Concatenation | `ab`     | Matches `a` followed by `b`                   |
+| Union         | `a\|b`   | Matches either `a` or `b`                     |
+| Kleene Star   | `a*`     | Matches zero or more repetitions of `a`       |
+| Plus          | `a+`     | Matches one or more repetitions of `a`        |
+| Grouping      | `(ab)`   | Groups expressions to apply operators to them |
+| Empty         | `∅`      | Matches nothing                               |
+| Lambda        | `λ`      | Matches the empty string                      |
 
 Operations can be combined and nested using parentheses:
 - `(a|b)*` — any string of `a`s and `b`s, including empty
 - `(ab)+` — one or more repetitions of `ab`
 - `a(b|c)*d` — `a`, then any combination of `b` and `c`, then `d`
+
+## Supported Flags
+
+Flags can be placed anywhere in the command and combined together (e.g. `-in`, `-vn`).
+
+| Flag | Description                                                  |
+|------|--------------------------------------------------------------|
+| `-c` | Print only the count of matching lines                       |
+| `-v` | Invert match — print lines that do **not** match            |
+| `-n` | Prefix each output line with its line number                 |
+| `-i` | Ignore case — match regardless of upper/lowercase            |
+| `-w` | Word match — only match if pattern is at a word boundary     |
+| `-x` | Line match — only match if the entire line matches the regex |
+
+**Examples:**
+```bash
+./grep -n  "ab"   text.txt   # show line numbers
+./grep -v  "ab"   text.txt   # lines that do NOT contain 'ab'
+./grep -c  "ab"   text.txt   # count of matching lines
+./grep -i  "AB"   text.txt   # case-insensitive match
+./grep -w  "ab"   text.txt   # 'ab' only as a whole word
+./grep -x  "ab"   text.txt   # lines where the entire content is 'ab'
+./grep -in "AB"   text.txt   # combined: case-insensitive + line numbers
+./grep -vn "ab"   text.txt   # combined: invert match + line numbers
+```
 
 ## Key Concepts
 - **Regular Expression Engines**  

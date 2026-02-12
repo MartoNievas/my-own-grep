@@ -25,7 +25,7 @@ public:
 
   const DFA *dfa() const;
 
-  bool match(const std::string &word) const;
+  bool match(std::string_view word) const;
 
   virtual std::unique_ptr<NDFA> to_ndfa() const = 0;
   virtual bool _atomic() const = 0;

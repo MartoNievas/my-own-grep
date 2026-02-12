@@ -1,4 +1,3 @@
-
 #include "../../include/fa/regex/regex.hpp"
 #include "../../include/fa/automata/dfa.hpp"
 #include "../../include/fa/automata/ndfa.hpp"
@@ -6,6 +5,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 using namespace std;
@@ -46,7 +46,6 @@ static unique_ptr<DFA_Fast> build_fast_dfa(const DFA &dfa) {
 
   fast->initial_state = 0;
 
-  // Inicializar tabla con -1
   fast->transitions.assign(idx, {});
   for (auto &row : fast->transitions)
     row.fill(-1);
@@ -59,7 +58,6 @@ static unique_ptr<DFA_Fast> build_fast_dfa(const DFA &dfa) {
     }
   }
 
-  // Estados de aceptación (UNA sola vez)
   fast->accept_states.assign(idx, false);
   for (const auto &accept : dfa.get_final_states()) {
     auto it = state_index.find(accept);
@@ -70,7 +68,7 @@ static unique_ptr<DFA_Fast> build_fast_dfa(const DFA &dfa) {
   return fast;
 }
 
-bool Regex::match(const string &word) const {
+bool Regex::match(string_view word) const {
   if (!_dfa_fast_cache) { // <-- ! aquí
     const DFA *dfa_ptr = dfa();
     if (!dfa_ptr)

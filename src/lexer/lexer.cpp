@@ -6,7 +6,6 @@
 
 using namespace std;
 
-// Si cambias el header, usa string_view para 'input'
 Lexer::Lexer(string_view text) : input(text), position(0) {
   current_char = input.empty() ? '\0' : input[0];
 }
@@ -73,7 +72,6 @@ Token Lexer::next_token() {
     case 'r':
       escaped = '\r';
       break;
-      // Puedes añadir \d, \w etc. si tu motor los soporta
     }
     advance();
     return Token(TOKEN_TYPE::LITERAL, escaped);
@@ -82,7 +80,6 @@ Token Lexer::next_token() {
   default: {
     char c = current_char;
     advance();
-    // Cualquier cosa que no sea un operador es un literal
     return Token(TOKEN_TYPE::LITERAL, c);
   }
   }
