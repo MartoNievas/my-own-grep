@@ -9,6 +9,14 @@ At a high level, the engine takes a regular expression, processes it through sev
 - **Parser**: Builds a structured representation of the regex from the token stream.
 - **Finite Automata**: Converts the parsed regex into an NDFA and/or DFA for efficient pattern matching.
 
+## Build Project
+
+To build this project, a makefile is provided and used as follows:
+
+```bash
+make grep
+```
+
 ## Usage
 ```bash
 ./grep [OPTION]... REGEX FILE
