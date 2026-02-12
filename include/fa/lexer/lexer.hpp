@@ -13,7 +13,6 @@ public:
   char current_char;
 
   void advance(void);
-  void skip_whitespace(void);
   char peek(int offset = 1) const;
 
 public:

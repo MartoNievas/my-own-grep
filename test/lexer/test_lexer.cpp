@@ -30,272 +30,252 @@ void print_section(const std::string &title) {
 }
 
 void print_tokens(const std::vector<Token> &tokens) {
-  for (const auto &token : tokens) {
+  for (const auto &token : tokens)
     std::cout << "  " << token.to_string() << std::endl;
-  }
 }
 
 void test_single_char() {
   print_section("Lexer: Single Character");
-
   Lexer lexer("a");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: 'a'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 2; // CHAR('a'), END
+  // a, END
+  bool test1 = tokens.size() == 2;
   bool test2 = tokens[0].type == TOKEN_TYPE::LITERAL && tokens[0].value == 'a';
   bool test3 = tokens[1].type == TOKEN_TYPE::END;
-
   print_test("Single char tokenized", test1 && test2 && test3);
 }
 
 void test_union_operator() {
   print_section("Lexer: Union Operator");
-
   Lexer lexer("a|b");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: 'a|b'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 4; // CHAR('a'), UNION, CHAR('b'), END
+  // a, UNION, b, END
+  bool test1 = tokens.size() == 4;
   bool test2 = tokens[0].type == TOKEN_TYPE::LITERAL;
   bool test3 = tokens[1].type == TOKEN_TYPE::UNION;
   bool test4 = tokens[2].type == TOKEN_TYPE::LITERAL;
-
   print_test("Union operator tokenized", test1 && test2 && test3 && test4);
 }
 
 void test_star_operator() {
   print_section("Lexer: Star Operator");
-
   Lexer lexer("a*");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: 'a*'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 3; // CHAR('a'), STAR, END
+  // a, STAR, END
+  bool test1 = tokens.size() == 3;
   bool test2 = tokens[0].type == TOKEN_TYPE::LITERAL;
   bool test3 = tokens[1].type == TOKEN_TYPE::STAR;
-
   print_test("Star operator tokenized", test1 && test2 && test3);
 }
 
 void test_plus_operator() {
   print_section("Lexer: Plus Operator");
-
   Lexer lexer("b+");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: 'b+'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 3; // CHAR('b'), PLUS, END
+  // b, PLUS, END
+  bool test1 = tokens.size() == 3;
   bool test2 = tokens[0].type == TOKEN_TYPE::LITERAL;
   bool test3 = tokens[1].type == TOKEN_TYPE::PLUS;
-
   print_test("Plus operator tokenized", test1 && test2 && test3);
 }
 
 void test_parentheses() {
   print_section("Lexer: Parentheses");
-
   Lexer lexer("(a)");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: '(a)'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 4; // OPAREN, CHAR('a'), CPAREN, END
+  // OPAREN, a, CPAREN, END
+  bool test1 = tokens.size() == 4;
   bool test2 = tokens[0].type == TOKEN_TYPE::OPAREN;
   bool test3 = tokens[1].type == TOKEN_TYPE::LITERAL;
   bool test4 = tokens[2].type == TOKEN_TYPE::CPAREN;
-
   print_test("Parentheses tokenized", test1 && test2 && test3 && test4);
 }
 
 void test_lambda() {
   print_section("Lexer: Lambda (@)");
-
   Lexer lexer("@");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: '@'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 2; // LAMBDA, END
+  // LAMBDA, END
+  bool test1 = tokens.size() == 2;
   bool test2 = tokens[0].type == TOKEN_TYPE::LAMBDA;
-
   print_test("Lambda tokenized", test1 && test2);
 }
 
 void test_empty() {
   print_section("Lexer: Empty Set (#)");
-
   Lexer lexer("#");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: '#'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 2; // EMPTY, END
+  // EMPTY, END
+  bool test1 = tokens.size() == 2;
   bool test2 = tokens[0].type == TOKEN_TYPE::EMPTY;
-
   print_test("Empty set tokenized", test1 && test2);
 }
 
 void test_simple_concat() {
   print_section("Lexer: Simple Concatenation");
-
   Lexer lexer("abc");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: 'abc'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 4; // CHAR('a'), CHAR('b'), CHAR('c'), END
-  bool test2 = tokens[0].value == 'a';
-  bool test3 = tokens[1].value == 'b';
-  bool test4 = tokens[2].value == 'c';
-
-  print_test("Concatenation tokenized", test1 && test2 && test3 && test4);
+  // a, CONCAT, b, CONCAT, c, END
+  bool test1 = tokens.size() == 6;
+  bool test2 = tokens[0].type == TOKEN_TYPE::LITERAL && tokens[0].value == 'a';
+  bool test3 = tokens[1].type == TOKEN_TYPE::CONCAT;
+  bool test4 = tokens[2].type == TOKEN_TYPE::LITERAL && tokens[2].value == 'b';
+  bool test5 = tokens[3].type == TOKEN_TYPE::CONCAT;
+  bool test6 = tokens[4].type == TOKEN_TYPE::LITERAL && tokens[4].value == 'c';
+  print_test("Concatenation tokenized",
+             test1 && test2 && test3 && test4 && test5 && test6);
 }
 
 void test_complex_expression_1() {
   print_section("Lexer: Complex Expression (a|b)*");
-
   Lexer lexer("(a|b)*");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: '(a|b)*'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 7; // (, a, |, b, ), *, END
+  // (, a, |, b, ), *, END
+  bool test1 = tokens.size() == 7;
   bool test2 = tokens[0].type == TOKEN_TYPE::OPAREN;
   bool test3 = tokens[5].type == TOKEN_TYPE::STAR;
-
   print_test("Complex expression (a|b)* tokenized", test1 && test2 && test3);
 }
 
 void test_complex_expression_2() {
   print_section("Lexer: Complex Expression (a|b)*abb");
-
   Lexer lexer("(a|b)*abb");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: '(a|b)*abb'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 10; // (, a, |, b, ), *, a, b, b, END
+  // (, a, |, b, ), *, CONCAT, a, CONCAT, b, CONCAT, b, END
+  bool test1 = tokens.size() == 13;
   bool test2 = tokens[0].type == TOKEN_TYPE::OPAREN;
   bool test3 = tokens[5].type == TOKEN_TYPE::STAR;
-  bool test4 = tokens[6].value == 'a';
-  bool test5 = tokens[7].value == 'b';
-  bool test6 = tokens[8].value == 'b';
-
+  bool test4 = tokens[6].type == TOKEN_TYPE::CONCAT;
+  bool test5 = tokens[7].type == TOKEN_TYPE::LITERAL && tokens[7].value == 'a';
+  bool test6 = tokens[8].type == TOKEN_TYPE::CONCAT;
+  bool test7 = tokens[9].type == TOKEN_TYPE::LITERAL && tokens[9].value == 'b';
+  bool test8 = tokens[10].type == TOKEN_TYPE::CONCAT;
+  bool test9 =
+      tokens[11].type == TOKEN_TYPE::LITERAL && tokens[11].value == 'b';
   print_test("Complex expression (a|b)*abb tokenized",
-             test1 && test2 && test3 && test4 && test5 && test6);
+             test1 && test2 && test3 && test4 && test5 && test6 && test7 &&
+                 test8 && test9);
 }
 
 void test_with_lambda() {
   print_section("Lexer: Expression with Lambda");
-
   Lexer lexer("a@b");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: 'a@b'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 4; // CHAR('a'), LAMBDA, CHAR('b'), END
-  bool test2 = tokens[0].type == TOKEN_TYPE::LITERAL;
-  bool test3 = tokens[1].type == TOKEN_TYPE::LAMBDA;
-  bool test4 = tokens[2].type == TOKEN_TYPE::LITERAL;
-
+  // a, CONCAT, @, CONCAT, b, END
+  bool test1 = tokens.size() == 6;
+  bool test2 = tokens[0].type == TOKEN_TYPE::LITERAL && tokens[0].value == 'a';
+  bool test3 = tokens[1].type == TOKEN_TYPE::CONCAT;
+  bool test4 = tokens[2].type == TOKEN_TYPE::LAMBDA;
+  bool test5 = tokens[3].type == TOKEN_TYPE::CONCAT;
+  bool test6 = tokens[4].type == TOKEN_TYPE::LITERAL && tokens[4].value == 'b';
   print_test("Expression with lambda tokenized",
-             test1 && test2 && test3 && test4);
+             test1 && test2 && test3 && test4 && test5 && test6);
 }
 
 void test_digits_and_special() {
   print_section("Lexer: Digits and Special Characters");
-
   Lexer lexer("0|1");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: '0|1'" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 4; // CHAR('0'), UNION, CHAR('1'), END
+  // 0, UNION, 1, END
+  bool test1 = tokens.size() == 4;
   bool test2 = tokens[0].value == '0';
   bool test3 = tokens[2].value == '1';
-
   print_test("Digits tokenized", test1 && test2 && test3);
 }
 
-void test_whitespace_handling() {
-  print_section("Lexer: Whitespace Handling");
-
-  Lexer lexer("a | b");
+void test_whitespace_as_literal() {
+  print_section("Lexer: Whitespace as Literal");
+  Lexer lexer("a b");
   auto tokens = lexer.tokenize();
-
-  std::cout << YELLOW "Input: 'a | b' (with spaces)" RESET << std::endl;
+  std::cout << YELLOW "Input: 'a b' (space is literal)" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 4; // CHAR('a'), UNION, CHAR('b'), END
-  bool test2 = tokens[0].type == TOKEN_TYPE::LITERAL;
-  bool test3 = tokens[1].type == TOKEN_TYPE::UNION;
-
-  print_test("Whitespace correctly skipped", test1 && test2 && test3);
+  // a, CONCAT, ' ', CONCAT, b, END
+  bool test1 = tokens.size() == 6;
+  bool test2 = tokens[0].type == TOKEN_TYPE::LITERAL && tokens[0].value == 'a';
+  bool test3 = tokens[1].type == TOKEN_TYPE::CONCAT;
+  bool test4 = tokens[2].type == TOKEN_TYPE::LITERAL && tokens[2].value == ' ';
+  bool test5 = tokens[3].type == TOKEN_TYPE::CONCAT;
+  bool test6 = tokens[4].type == TOKEN_TYPE::LITERAL && tokens[4].value == 'b';
+  print_test("Space treated as literal",
+             test1 && test2 && test3 && test4 && test5 && test6);
 }
 
 void test_empty_input() {
   print_section("Lexer: Empty Input");
-
   Lexer lexer("");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: '' (empty)" RESET << std::endl;
   print_tokens(tokens);
 
-  bool test1 = tokens.size() == 1; // Only END
+  // END
+  bool test1 = tokens.size() == 1;
   bool test2 = tokens[0].type == TOKEN_TYPE::END;
-
   print_test("Empty input handled", test1 && test2);
 }
 
 void test_nested_parentheses() {
   print_section("Lexer: Nested Parentheses");
-
   Lexer lexer("((a|b)*c)+");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: '((a|b)*c)+'" RESET << std::endl;
   print_tokens(tokens);
 
+  // ((a|b)*  CONCAT  c)  +
+  // (, (, a, |, b, ), *, CONCAT, c, ), CONCAT... wait — outer ) then +
   bool test1 = tokens[0].type == TOKEN_TYPE::OPAREN;
   bool test2 = tokens[1].type == TOKEN_TYPE::OPAREN;
-  bool test3 = tokens[8].type == TOKEN_TYPE::CPAREN &&
-               tokens[9].type == TOKEN_TYPE::PLUS;
-  print_test("Nested parentheses tokenized", test1 && test2 && test3);
+  // buscar CPAREN externo y PLUS al final antes de END
+  bool test3 = tokens[tokens.size() - 2].type == TOKEN_TYPE::PLUS;
+  bool test4 = tokens[tokens.size() - 1].type == TOKEN_TYPE::END;
+  print_test("Nested parentheses tokenized", test1 && test2 && test3 && test4);
 }
 
 void test_all_operators() {
   print_section("Lexer: All Operators");
-
   Lexer lexer("a|b*c+(@)#");
   auto tokens = lexer.tokenize();
-
   std::cout << YELLOW "Input: 'a|b*c+(@)#'" RESET << std::endl;
   print_tokens(tokens);
 
-  int char_count = 0;
-  int union_count = 0;
-  int star_count = 0;
-  int plus_count = 0;
-  int lambda_count = 0;
-  int empty_count = 0;
+  int char_count = 0, union_count = 0, star_count = 0;
+  int plus_count = 0, lambda_count = 0, empty_count = 0;
 
   for (const auto &token : tokens) {
     if (token.type == TOKEN_TYPE::LITERAL)
@@ -312,15 +292,9 @@ void test_all_operators() {
       empty_count++;
   }
 
-  bool test1 = char_count == 3; // a, b, c
-  bool test2 = union_count == 1;
-  bool test3 = star_count == 1;
-  bool test4 = plus_count == 1;
-  bool test5 = lambda_count == 1;
-  bool test6 = empty_count == 1;
-
   print_test("All operators present",
-             test1 && test2 && test3 && test4 && test5 && test6);
+             char_count == 3 && union_count == 1 && star_count == 1 &&
+                 plus_count == 1 && lambda_count == 1 && empty_count == 1);
 }
 
 int main() {
@@ -331,7 +305,6 @@ int main() {
   std::cout << CYAN "╚════════════════════════════════════════╝" RESET
             << std::endl;
 
-  // Basic tests
   test_single_char();
   test_union_operator();
   test_star_operator();
@@ -340,15 +313,13 @@ int main() {
   test_lambda();
   test_empty();
 
-  // Concatenation and complex
   test_simple_concat();
   test_complex_expression_1();
   test_complex_expression_2();
   test_with_lambda();
 
-  // Edge cases
   test_digits_and_special();
-  test_whitespace_handling();
+  test_whitespace_as_literal();
   test_empty_input();
   test_nested_parentheses();
   test_all_operators();

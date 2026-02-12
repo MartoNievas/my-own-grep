@@ -65,6 +65,12 @@ static Args parse_args(int argc, char **argv) {
 
   for (int i = 1; i < argc; i++) {
     string_view arg(argv[i]);
+
+    if (arg.empty()) {
+      positional.push_back(arg);
+      continue;
+    }
+
     if (arg[0] == '-') {
       for (char c : arg.substr(1)) {
         switch (c) {
@@ -200,9 +206,16 @@ int main(int argc, char *argv[]) {
     }
     return 1;
   }
+
   try {
-    Parser parser(args.regex);
-    shared_ptr<Regex> engine = parser.parse();
+    bool empty_regex = args.regex.empty();
+
+    shared_ptr<Regex> engine;
+
+    if (!empty_regex) {
+      Parser parser(args.regex);
+      engine = parser.parse();
+    }
 
     ifstream file(args.filepath);
     if (!file.is_open()) {
@@ -217,7 +230,14 @@ int main(int argc, char *argv[]) {
     while (getline(file, line)) {
       line_num++;
       bool has_match = false;
-      string output = process_line(line, engine, args.flags, has_match);
+      string output;
+
+      if (empty_regex) {
+        has_match = true;
+        output = line;
+      } else {
+        output = process_line(line, engine, args.flags, has_match);
+      }
 
       bool print = args.flags.invert_match ? !has_match : has_match;
 

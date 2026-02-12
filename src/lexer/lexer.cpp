@@ -1,6 +1,5 @@
 #include "../../include/fa/lexer/lexer.hpp"
 #include "../../include/fa/lexer/token.hpp"
-#include <cctype>
 #include <stdexcept>
 #include <string_view>
 
@@ -20,14 +19,7 @@ char Lexer::peek(int offset) const {
   return (peek_pos < input.length()) ? input[peek_pos] : '\0';
 }
 
-void Lexer::skip_whitespace() {
-  while (current_char != '\0' && isspace(current_char)) {
-    advance();
-  }
-}
-
 Token Lexer::next_token() {
-  skip_whitespace();
 
   if (current_char == '\0') {
     return Token(TOKEN_TYPE::END);
