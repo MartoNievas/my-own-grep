@@ -15,6 +15,15 @@ using namespace fa::regex;
 #define BOLD_RED "\033[1;31m"
 #define RESET "\033[0m"
 
+static const vector<string> flags = {
+    "-c    Print only a count of matching lines per file.",
+    "-v    Select non-matching lines (invert match).",
+    "-n    Print line number with output lines.",
+    "-i    Ignore case distinctions.",
+    "-w    Match only whole words.",
+    "-x    Match only whole lines.",
+    "-h    Display this help text and exit."};
+
 struct Flags {
   bool count = false;        // -c
   bool invert_match = false; // -v
@@ -22,6 +31,7 @@ struct Flags {
   bool ignore_case = false;  // -i
   bool word_regexp = false;  // -w
   bool line_regexp = false;  // -x
+  bool help = false;         // -h
 };
 
 struct Args {
@@ -58,6 +68,9 @@ static Args parse_args(int argc, char **argv) {
         case 'x':
           args.flags.line_regexp = true;
           break;
+        case 'h':
+          args.flags.help = true;
+          return args;
         default:
           cerr << format("Unknown flag: -{}\n", c);
           return args;
@@ -147,14 +160,27 @@ static string process_line(string_view line, const shared_ptr<Regex> &engine,
   return output;
 }
 
+static void help_handle() {
+  cout << "Usage: ./bin/grep [OPTION]... REGEX [FILE]...\n";
+  cout << "Example: ./bin/grep -i 'hello_world' main.c\n\n";
+  cout << "Flags supported by program:\n";
+
+  for (const string &flag : flags) {
+    cout << "  " << flag << "\n";
+  }
+}
+
 int main(int argc, char *argv[]) {
   ios_base::sync_with_stdio(false);
   cin.tie(NULL);
 
   Args args = parse_args(argc, argv);
-  if (!args.valid)
+  if (!args.valid) {
+    if (args.flags.help) {
+      help_handle();
+    }
     return 1;
-
+  }
   try {
     Parser parser(args.regex);
     shared_ptr<Regex> engine = parser.parse();
