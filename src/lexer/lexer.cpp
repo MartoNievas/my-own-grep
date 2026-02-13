@@ -85,6 +85,11 @@ Token Lexer::next_token() {
       advance();
     }
 
+    if (current_char == '-') {
+      cls.add_literal('-');
+      advance();
+    }
+
     while (current_char != ']' && current_char != '\0') {
       char start_c = get_escaped_char();
       if (start_c == '\0')
