@@ -29,7 +29,6 @@ class Token {
 private:
   TOKEN_TYPE type;
   char value;
-
   fa::regex::CharClass char_class;
 
 public:

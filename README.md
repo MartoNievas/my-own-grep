@@ -115,7 +115,7 @@ If the first or only literal in a set of the form `[]` is `^`, the literal must 
 ## References
 - [Turing machine](https://en.wikipedia.org/wiki/Turing_machine)  
 - [Finite-state machine](https://en-wikipedia-org.translate.goog/wiki/Finite-state_machine?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=tc)
-- [TsodingIf the first or only literal in a set of the form `[]` is `^`, the literal must be escaped; otherwise, it is not necessary to do so. Regex From Scratch](https://www.youtube.com/watch?v=MH56D5M9xSQ&t=7641s) 
+- [Tsoding Regex From Scratch](https://www.youtube.com/watch?v=MH56D5M9xSQ&t=7641s) 
 - [Parser and Lexer](https://www.ishtms.com/blog/compiler-from-scratch/building-lexer-2) 
 ## License
 
