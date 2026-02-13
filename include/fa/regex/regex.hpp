@@ -2,17 +2,19 @@
 #define REGEX_HPP
 #include "../automata/dfa.hpp"
 #include "../automata/ndfa.hpp"
+#include <bitset>
 #include <memory>
-#include <optional>
 #include <string>
 #include <string_view>
-
+#include <vector>
 namespace fa::regex {
+
 struct DFA_Fast {
   int initial_state = -1;
   std::vector<std::array<int, 256>> transitions;
   std::vector<bool> accept_states;
 };
+
 class Regex {
 
 protected:
@@ -98,6 +100,32 @@ private:
 
 public:
   explicit Plus(std::shared_ptr<Regex> e);
+  std::unique_ptr<NDFA> to_ndfa() const override;
+  bool _atomic() const override;
+  std::string to_string() const override;
+};
+
+struct CharClass {
+  std::bitset<256> bits;
+  bool negate = false;
+
+  void add_literal(unsigned char c) { bits.set(c); }
+  void add_range(unsigned char start, unsigned char end) {
+    for (int i = start; i <= end; ++i)
+      bits.set(i);
+  }
+
+  bool matches(unsigned char c) const {
+    return negate ? !bits.test(c) : bits.test(c);
+  }
+};
+
+class Range : public Regex {
+private:
+  CharClass cls;
+
+public:
+  explicit Range(const CharClass &char_class);
   std::unique_ptr<NDFA> to_ndfa() const override;
   bool _atomic() const override;
   std::string to_string() const override;

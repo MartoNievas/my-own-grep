@@ -8,21 +8,29 @@
 using namespace std;
 using namespace fa::regex;
 
-// public methods
+Parser::Parser(const string &input)
+    : current_idx(0), current(TOKEN_TYPE::INVALID) {
+  Lexer lexer(input);
+  tokens = lexer.tokenize();
+  if (!tokens.empty()) {
+    current = tokens[current_idx];
+  }
+}
 
 shared_ptr<Regex> Parser::parse(void) {
   auto result = parse_union();
-  if (current.type != TOKEN_TYPE::END) {
+  if (current.get_type() != TOKEN_TYPE::END) {
     throw runtime_error("Error: Unexpected character at the end of expression");
   }
   return result;
 }
 
-// Private methods
-
 void Parser::eat(TOKEN_TYPE type) {
-  if (current.type == type) {
-    current = lexer.next_token();
+  if (current.get_type() == type) {
+    current_idx++;
+    if (current_idx < tokens.size()) {
+      current = tokens[current_idx];
+    }
   } else {
     throw runtime_error(
         format("Syntax Error: Expected token type {}, but found {}", (int)type,
@@ -32,8 +40,7 @@ void Parser::eat(TOKEN_TYPE type) {
 
 shared_ptr<Regex> Parser::parse_union(void) {
   auto expr = parse_concat();
-
-  while (current.type == TOKEN_TYPE::UNION) {
+  while (current.get_type() == TOKEN_TYPE::UNION) {
     eat(TOKEN_TYPE::UNION);
     auto right = parse_concat();
     expr = make_shared<Union>(expr, right);
@@ -43,11 +50,8 @@ shared_ptr<Regex> Parser::parse_union(void) {
 
 shared_ptr<Regex> Parser::parse_concat(void) {
   auto expr = parse_star();
-
-  while (current.type == TOKEN_TYPE::LITERAL ||
-         current.type == TOKEN_TYPE::OPAREN ||
-         current.type == TOKEN_TYPE::LAMBDA ||
-         current.type == TOKEN_TYPE::EMPTY) {
+  while (current.get_type() == TOKEN_TYPE::CONCAT) {
+    eat(TOKEN_TYPE::CONCAT);
     auto next_expr = parse_star();
     expr = make_shared<Concat>(expr, next_expr);
   }
@@ -56,9 +60,9 @@ shared_ptr<Regex> Parser::parse_concat(void) {
 
 shared_ptr<Regex> Parser::parse_star(void) {
   auto expr = parse_atom();
-
-  while (current.type == TOKEN_TYPE::STAR || current.type == TOKEN_TYPE::PLUS) {
-    if (current.type == TOKEN_TYPE::STAR) {
+  while (current.get_type() == TOKEN_TYPE::STAR ||
+         current.get_type() == TOKEN_TYPE::PLUS) {
+    if (current.get_type() == TOKEN_TYPE::STAR) {
       eat(TOKEN_TYPE::STAR);
       expr = make_shared<Star>(expr);
     } else {
@@ -70,9 +74,9 @@ shared_ptr<Regex> Parser::parse_star(void) {
 }
 
 shared_ptr<Regex> Parser::parse_atom(void) {
-  switch (current.type) {
+  switch (current.get_type()) {
   case TOKEN_TYPE::LITERAL: {
-    char c = current.value;
+    char c = current.get_value();
     eat(TOKEN_TYPE::LITERAL);
     return make_shared<Char>(c);
   }
@@ -89,6 +93,11 @@ shared_ptr<Regex> Parser::parse_atom(void) {
   case TOKEN_TYPE::EMPTY: {
     eat(TOKEN_TYPE::EMPTY);
     return make_shared<Empty>();
+  }
+  case TOKEN_TYPE::RANGE: {
+    auto node = make_shared<fa::regex::Range>(current.get_char_class());
+    eat(TOKEN_TYPE::RANGE);
+    return node;
   }
   default:
     throw runtime_error(format("Error: Unknown atom or empty expression: {}",

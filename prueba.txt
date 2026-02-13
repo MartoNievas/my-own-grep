@@ -1,0 +1,16 @@
+Hola Mundo!
+123-456
+test@example.com
+[Contenido entre corchetes]
+Linea con	tabulacion
+Ruta: /usr/bin/local
+
+[[[[[]]]]]
+{{{{}}}}
+(((((())))))
+*******
+^^^^^^^
+/////////
+\\\\\\\\\
+----------
+|||||||||||

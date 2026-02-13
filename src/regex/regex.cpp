@@ -1,6 +1,7 @@
 #include "../../include/fa/regex/regex.hpp"
 #include "../../include/fa/automata/dfa.hpp"
 #include "../../include/fa/automata/ndfa.hpp"
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <set>
@@ -371,6 +372,52 @@ bool Plus::_atomic(void) const { return false; }
 string Plus::to_string(void) const {
   return (expr->_atomic()) ? expr->to_string() + "+"
                            : "(" + expr->to_string() + ")+";
+}
+
+Range::Range(const CharClass &char_class) : cls(char_class) {}
+
+unique_ptr<NDFA> Range::to_ndfa() const {
+  unique_ptr<NDFA> new_ndfa = make_unique<NDFA>();
+
+  if (!new_ndfa)
+    return new_ndfa;
+
+  new_ndfa->add_state("q0");
+  new_ndfa->mark_initial_state("q0");
+  new_ndfa->add_state("q1", true);
+
+  for (int i = 0; i < 256; i++) {
+    unsigned char c = static_cast<unsigned char>(i);
+
+    if (cls.matches(c)) {
+      new_ndfa->add_transition("q0", (char)c, "q1");
+    }
+  }
+
+  return new_ndfa;
+}
+
+bool Range::_atomic() const { return true; }
+
+string Range::to_string() const {
+  string s = (cls.negate) ? "[^" : "[";
+
+  for (int i = 0; i < 256; i++) {
+    if (cls.bits.test(i)) {
+      char c = static_cast<char>(i);
+      if (c == '\n')
+        s += "/n";
+      else if (c == '\t')
+        s += "/t";
+      else if (c == '\r')
+        s += "/r";
+      else if (c >= 32 && c <= 126)
+        s += c;
+    }
+  }
+
+  s += ']';
+  return s;
 }
 
 } // namespace fa::regex

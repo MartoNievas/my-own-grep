@@ -6,14 +6,16 @@
 #include "../regex/regex.hpp"
 #include <memory>
 #include <string>
+#include <vector>
+
 class Parser {
 private:
-  Lexer lexer;
+  std::vector<Token> tokens;
+  size_t current_idx;
   Token current;
 
 public:
-  Parser(const std::string &input)
-      : lexer(input), current(lexer.next_token()) {}
+  Parser(const std::string &input);
   std::shared_ptr<fa::regex::Regex> parse(void);
   void eat(TOKEN_TYPE type);
   std::shared_ptr<fa::regex::Regex> parse_union(void);

@@ -19,7 +19,7 @@ make grep
 
 ## Usage
 ```bash
-./grep [OPTION]... REGEX FILE
+./grep [OPTION]... REGEX [FILE]...
 ```
 
 **Examples:**
@@ -45,6 +45,8 @@ make grep
 | Union         | `a\|b`   | Matches either `a` or `b`                     |
 | Kleene Star   | `a*`     | Matches zero or more repetitions of `a`       |
 | Plus          | `a+`     | Matches one or more repetitions of `a`        |
+| Range         | [[a-z]]  | Matches the range between a and z           |
+| Set           | [[aeiuo]] | Match all character in the set              | 
 | Grouping      | `(ab)`   | Groups expressions to apply operators to them |
 | Empty         | `∅`      | Matches nothing                               |
 | Lambda        | `λ`      | Matches the empty string                      |
@@ -93,9 +95,27 @@ Flags can be placed anywhere in the command and combined together (e.g. `-in`, `
 - **grep**  
   The Unix tool `grep` (Global Regular Expression Print) is a classic example of a regex engine used for searching text with patterns. This project is inspired by the matching and automata-based techniques commonly associated with `grep`.
 
+## Clarifications
+To treat metacharacters (symbols with special functional meaning) as literal characters, you must use the escape character `/`. The symbols that require escaping include:
+
+* **Operators and Quantifiers**: `/*`, `/+`, `/|`
+* **Grouping Delimiters**: `/(`, `/)`
+* **Character Classes (Sets)**: `/[`, `/]`
+* **Literal Escape**: To match a literal forward slash, use `//`.
+
+Additionally, the engine supports the following special escape sequences:
+* `/n`: Line Feed (Newline).
+* `/t`: Horizontal Tab.
+* `/r`: Carriage Return.
+
+
 ## References
 - Turing machine — https://en.wikipedia.org/wiki/Turing_machine  
 - Finite-state machine — https://en-wikipedia-org.translate.goog/wiki/Finite-state_machine?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=tc
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Status
 This is a work-in-progress implementation of the core components of a regex engine. Contributions, suggestions, and improvements are welcome!

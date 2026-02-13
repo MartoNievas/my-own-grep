@@ -1,5 +1,6 @@
 #include "../../include/fa/lexer/lexer.hpp"
 #include "../../include/fa/lexer/token.hpp"
+#include "../../include/fa/regex/regex.hpp"
 #include <stdexcept>
 #include <string_view>
 
@@ -19,11 +20,37 @@ char Lexer::peek(int offset) const {
   return (peek_pos < input.length()) ? input[peek_pos] : '\0';
 }
 
-Token Lexer::next_token() {
+char Lexer::get_escaped_char() {
+  char c = current_char;
+  if (c == '/') {
+    advance();
+    if (current_char == '\0')
+      return '\0';
 
-  if (current_char == '\0') {
-    return Token(TOKEN_TYPE::END);
+    switch (current_char) {
+    case 'n':
+      c = '\n';
+      break;
+    case 't':
+      c = '\t';
+      break;
+    case 'r':
+      c = '\r';
+      break;
+    default:
+      c = current_char;
+      break;
+    }
+    advance();
+  } else {
+    advance();
   }
+  return c;
+}
+
+Token Lexer::next_token() {
+  if (current_char == '\0')
+    return Token(TOKEN_TYPE::END);
 
   switch (current_char) {
   case '|':
@@ -41,31 +68,57 @@ Token Lexer::next_token() {
   case ')':
     advance();
     return Token(TOKEN_TYPE::CPAREN, ')');
-  case '@':
-    advance();
-    return Token(TOKEN_TYPE::LAMBDA);
-  case '#':
-    advance();
-    return Token(TOKEN_TYPE::EMPTY);
 
-  case '\\': { // Manejo de escapes mejorado
+  case '[': {
     advance();
-    if (current_char == '\0')
+    bool negate = false;
+    if (current_char == '^') {
+      negate = true;
+      advance();
+    }
+
+    fa::regex::CharClass cls;
+    cls.negate = negate;
+
+    if (current_char == ']') {
+      cls.add_literal(']');
+      advance();
+    }
+
+    while (current_char != ']' && current_char != '\0') {
+      char start_c = get_escaped_char();
+      if (start_c == '\0')
+        return Token(TOKEN_TYPE::INVALID);
+
+      if (current_char == '-' && peek(1) != ']' && peek(1) != '\0') {
+        advance();
+        char end_c = get_escaped_char();
+        if (end_c == '\0')
+          return Token(TOKEN_TYPE::INVALID);
+
+        cls.add_range((unsigned char)start_c, (unsigned char)end_c);
+      } else {
+        cls.add_literal((unsigned char)start_c);
+      }
+    }
+
+    if (current_char != ']')
       return Token(TOKEN_TYPE::INVALID);
 
-    char escaped = current_char;
-    switch (current_char) {
-    case 'n':
-      escaped = '\n';
-      break;
-    case 't':
-      escaped = '\t';
-      break;
-    case 'r':
-      escaped = '\r';
-      break;
-    }
     advance();
+
+    Token t(TOKEN_TYPE::RANGE);
+    t.set_char_class(cls);
+    if (cls.bits.none()) {
+      return Token(TOKEN_TYPE::INVALID);
+    }
+    return t;
+  }
+
+  case '/': {
+    char escaped = get_escaped_char();
+    if (escaped == '\0')
+      return Token(TOKEN_TYPE::INVALID);
     return Token(TOKEN_TYPE::LITERAL, escaped);
   }
 
@@ -79,23 +132,19 @@ Token Lexer::next_token() {
 
 vector<Token> Lexer::tokenize() {
   vector<Token> tokens;
-
   while (true) {
     Token token = next_token();
-    if (token.type == TOKEN_TYPE::INVALID) {
+    if (token.get_type() == TOKEN_TYPE::INVALID)
       throw invalid_argument("Lexer Error: Invalid character at position " +
                              to_string(position));
-    }
 
     tokens.push_back(token);
-    if (token.type == TOKEN_TYPE::END)
+    if (token.get_type() == TOKEN_TYPE::END)
       break;
   }
-
   return insert_implicit_concatenation(tokens);
 }
 
-// Función auxiliar opcional pero MUY recomendada para Regex
 vector<Token>
 Lexer::insert_implicit_concatenation(const vector<Token> &tokens) {
   vector<Token> result;
@@ -106,21 +155,18 @@ Lexer::insert_implicit_concatenation(const vector<Token> &tokens) {
     if (i + 1 < tokens.size()) {
       Token t2 = tokens[i + 1];
 
-      // Lógica: Si t1 es un operando y t2 es el inicio de otro operando,
-      // insertar CONCAT
-      bool t1_is_operand =
-          (t1.type == TOKEN_TYPE::LITERAL || t1.type == TOKEN_TYPE::CPAREN ||
-           t1.type == TOKEN_TYPE::STAR || t1.type == TOKEN_TYPE::PLUS ||
-           t1.type == TOKEN_TYPE::LAMBDA || t1.type == TOKEN_TYPE::EMPTY);
+      bool t1_is_operand = (t1.get_type() == TOKEN_TYPE::LITERAL ||
+                            t1.get_type() == TOKEN_TYPE::CPAREN ||
+                            t1.get_type() == TOKEN_TYPE::STAR ||
+                            t1.get_type() == TOKEN_TYPE::PLUS ||
+                            t1.get_type() == TOKEN_TYPE::RANGE);
 
-      bool t2_starts_operand =
-          (t2.type == TOKEN_TYPE::LITERAL || t2.type == TOKEN_TYPE::OPAREN ||
-           t2.type == TOKEN_TYPE::LAMBDA || t2.type == TOKEN_TYPE::EMPTY);
+      bool t2_starts_operand = (t2.get_type() == TOKEN_TYPE::LITERAL ||
+                                t2.get_type() == TOKEN_TYPE::OPAREN ||
+                                t2.get_type() == TOKEN_TYPE::RANGE);
 
-      if (t1_is_operand && t2_starts_operand) {
-        // Debes tener un tipo TOKEN_TYPE::CONCAT en tu enum
+      if (t1_is_operand && t2_starts_operand)
         result.push_back(Token(TOKEN_TYPE::CONCAT, '.'));
-      }
     }
   }
   return result;

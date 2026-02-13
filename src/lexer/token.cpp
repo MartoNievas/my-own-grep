@@ -1,8 +1,9 @@
 #include "../../include/fa/lexer/token.hpp"
-#include <format> // Requiere C++20
+#include <format>
 #include <string>
 
 using namespace std;
+using namespace fa::regex;
 
 string Token::to_string() const {
   switch (type) {

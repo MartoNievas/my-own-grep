@@ -4,3 +4,5 @@ grep
 main
 bin
 text
+compile_flags.txt
+*.txt
