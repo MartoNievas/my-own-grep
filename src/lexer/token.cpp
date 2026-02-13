@@ -5,6 +5,21 @@
 using namespace std;
 using namespace fa::regex;
 
+// Getters
+TOKEN_TYPE Token::get_type() const { return type; }
+char Token::get_value() const { return value; }
+const CharClass &Token::get_char_class() const { return char_class; }
+
+// Setters
+void Token::set_type(TOKEN_TYPE t) { type = t; }
+void Token::set_value(char v) { value = v; }
+
+void Token::set_char_class(const fa::regex::CharClass &cls) {
+  this->char_class = cls;
+}
+
+void Token::set_negate(bool n) { char_class.negate = n; }
+
 string Token::to_string() const {
   switch (type) {
   case TOKEN_TYPE::LITERAL: {

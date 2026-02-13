@@ -36,19 +36,17 @@ public:
   Token(TOKEN_TYPE type, char literal = '\0') : type(type), value(literal) {}
 
   // Getters
-  TOKEN_TYPE get_type() const { return type; }
-  char get_value() const { return value; }
-  const fa::regex::CharClass &get_char_class() const { return char_class; }
+  TOKEN_TYPE get_type() const;
+  char get_value() const;
+  const fa::regex::CharClass &get_char_class() const;
 
   // Setters
-  void set_type(TOKEN_TYPE t) { type = t; }
-  void set_value(char v) { value = v; }
+  void set_type(TOKEN_TYPE t);
+  void set_value(char v);
 
-  void set_char_class(const fa::regex::CharClass &cls) {
-    this->char_class = cls;
-  }
+  void set_char_class(const fa::regex::CharClass &cls);
 
-  void set_negate(bool n) { char_class.negate = n; }
+  void set_negate(bool n);
 
   std::string to_string() const;
 };

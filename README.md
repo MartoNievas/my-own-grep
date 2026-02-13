@@ -19,21 +19,21 @@ make grep
 
 ## Usage
 ```bash
-./grep [OPTION]... REGEX [FILE]...
+./regex_engine [OPTION]... REGEX [FILE]...
 ```
 
 **Examples:**
 ```bash
-./grep "a"          text.txt   # lines containing 'a'
-./grep "ab"         text.txt   # lines containing 'ab'
-./grep "a|b"        text.txt   # lines containing 'a' or 'b'
-./grep "ab*"        text.txt   # lines containing 'a' followed by zero or more 'b'
-./grep "ab+"        text.txt   # lines containing 'a' followed by one or more 'b'
-./grep "(ab|cd)+"   text.txt   # lines containing one or more repetitions of 'ab' or 'cd'
-./grep -n "a"       text.txt   # show line numbers
-./grep -v "a"       text.txt   # lines that do NOT contain 'a'
-./grep -c "a"       text.txt   # count matching lines
-./grep -in "a"      text.txt   # flags can be combined
+./regex_engine "a"          text.txt   # lines containing 'a'
+./regex_engine "ab"         text.txt   # lines containing 'ab'
+./regex_engine "a|b"        text.txt   # lines containing 'a' or 'b'
+./regex_engine "ab*"        text.txt   # lines containing 'a' followed by zero or more 'b'
+./regex_engine "ab+"        text.txt   # lines containing 'a' followed by one or more 'b'
+./regex_engine "(ab|cd)+"   text.txt   # lines containing one or more repetitions of 'ab' or 'cd'
+./regex_engine -n "a"       text.txt   # show line numbers
+./regex_engine -v "a"       text.txt   # lines that do NOT contain 'a'
+./regex_engine -c "a"       text.txt   # count matching lines
+./regex_engine -in "a"      text.txt   # flags can be combined
 ```
 
 ## Supported Operations
@@ -71,14 +71,16 @@ Flags can be placed anywhere in the command and combined together (e.g. `-in`, `
 
 **Examples:**
 ```bash
-./grep -n  "ab"   text.txt   # show line numbers
-./grep -v  "ab"   text.txt   # lines that do NOT contain 'ab'
-./grep -c  "ab"   text.txt   # count of matching lines
-./grep -i  "AB"   text.txt   # case-insensitive match
-./grep -w  "ab"   text.txt   # 'ab' only as a whole word
-./grep -x  "ab"   text.txt   # lines where the entire content is 'ab'
-./grep -in "AB"   text.txt   # combined: case-insensitive + line numbers
-./grep -vn "ab"   text.txt   # combined: invert match + line numbers
+./regex_engine -n  "ab"   text.txt   # show line numbers
+./regex_engine -v  "ab"   text.txt   # lines that do NOT contain 'ab'
+./regex_engine -c  "ab"   text.txt   # count of matching lines
+./regex_engine -i  "AB"   text.txt   # case-insensitive match
+./regex_engine -w  "ab"   text.txt   # 'ab' only as a whole word
+./regex_engine -x  "ab"   text.txt   # lines where the entire content is 'ab'
+./regex_engine -in "AB"   text.txt   # combined: case-insensitive + line numbers
+./regex_engine -vn "ab"   text.txt   # combined: invert match + line numbers
+./regex_engine -i "[a-z]" text.txt   # case-insensitive match in a range from a to z
+./regex_engine [^a-z] text.txt       # not there matching in the range from a to z
 ```
 
 ## Key Concepts
@@ -108,11 +110,13 @@ Additionally, the engine supports the following special escape sequences:
 * `/t`: Horizontal Tab.
 * `/r`: Carriage Return.
 
+If the first or only literal in a set of the form `[]` is `^`, the literal must be escaped; otherwise, it is not necessary to do so.
 
 ## References
-- Turing machine — https://en.wikipedia.org/wiki/Turing_machine  
-- Finite-state machine — https://en-wikipedia-org.translate.goog/wiki/Finite-state_machine?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=tc
-
+- [Turing machine](https://en.wikipedia.org/wiki/Turing_machine)  
+- [Finite-state machine](https://en-wikipedia-org.translate.goog/wiki/Finite-state_machine?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=tc)
+- [TsodingIf the first or only literal in a set of the form `[]` is `^`, the literal must be escaped; otherwise, it is not necessary to do so. Regex From Scratch](https://www.youtube.com/watch?v=MH56D5M9xSQ&t=7641s) 
+- [Parser and Lexer](https://www.ishtms.com/blog/compiler-from-scratch/building-lexer-2) 
 ## License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
